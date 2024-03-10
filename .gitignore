@@ -1,4 +1,5 @@
 build
+plotgrep
 
 *.pdf
 *.ppm
