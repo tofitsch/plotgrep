@@ -1,10 +1,11 @@
 import cv2
-from numpy import array
 from pdf2image import convert_from_path
+import numpy as np
+import matplotlib.pyplot as plt
 
 # convert PDF to image then to array ready for opencv
 pages = convert_from_path('input/2310.16497.pdf', dpi=100)
-img = array(pages[11])
+img = np.array(pages[11])
 
 #height, width = img.shape[:2]
 #desired_width = 2**8
@@ -12,9 +13,15 @@ img = array(pages[11])
 #desired_height = int(height * ratio)
 #img = cv2.resize(img, (desired_width, desired_height))
 
-#blur = cv2.pyrMeanShiftFiltering(img, 11, 21)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+blur = cv2.pyrMeanShiftFiltering(img, 21, 21)
+gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+_, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+
+
+n_x, n_y = np.shape(thresh)
+
+max_right = np.zeros_like(thresh)
+max_down = np.zeros_like(thresh)
 
 cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cnts = cnts[0] if len(cnts) == 2 else cnts[1]
@@ -33,7 +40,7 @@ for c in cnts:
     ctr += 1
 
 cv2.imwrite('output/img.png', img, [cv2.IMWRITE_PNG_COMPRESSION, 0])
-cv2.imwrite('output/thresh.png', img, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+cv2.imwrite('output/thresh.png', thresh, [cv2.IMWRITE_PNG_COMPRESSION, 0])
 #cv2.imshow('thresh', thresh)
 #cv2.imshow('image', img)
 #cv2.waitKey(0)

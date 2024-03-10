@@ -1,0 +1,7 @@
+build
+
+*.pdf
+*.ppm
+
+*.swp
+*.swo
