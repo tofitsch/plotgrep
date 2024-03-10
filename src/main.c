@@ -13,25 +13,22 @@
 
 #include "bitmap.h"
 
+#define ZOOM 2
 #define THRESHOLD 200
 
 int main(int argc, char **argv) {
 
-  int page_number, page_count;
+  int page_count;
 
   fz_context *ctx;
   fz_document *doc;
   fz_pixmap *pix;
   fz_matrix mtx;
 
-  if (argc < 3) {
-    fprintf(stderr, "usage: example input-file page-number\n");
-    fprintf(stderr, "\tinput-file: path of PDF\n");
-    fprintf(stderr, "\tpage-number: starts from one\n");
+  if (argc != 2) {
+    fprintf(stderr, "usage: plotgrep <input.pdf>\n");
     return EXIT_FAILURE;
   }
-
-  page_number = atoi(argv[2]) - 1;
 
   /* Create a context to hold the exception stack and various caches. */
   ctx = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
@@ -72,53 +69,53 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  if (page_number < 0 || page_number >= page_count)
-  {
-    fprintf(stderr, "page number out of range: %d (page count %d)\n", page_number + 1, page_count);
-    fz_drop_document(ctx, doc);
-    fz_drop_context(ctx);
-    return EXIT_FAILURE;
-  }
-
-  mtx = fz_scale(2, 2);
-
-  /* Render page to an RGB pixmap. */
-  fz_try(ctx)
-    pix = fz_new_pixmap_from_page_number(ctx, doc, page_number, mtx, fz_device_gray(ctx), 0);
-  fz_catch(ctx)
-  {
-    fprintf(stderr, "cannot render page: %s\n", fz_caught_message(ctx));
-    fz_drop_document(ctx, doc);
-    fz_drop_context(ctx);
-    return EXIT_FAILURE;
-  }
-
-  bitmap *bm = bitmap_from_pix(pix, THRESHOLD);
-
-  bitmap *plots[MAX_PLOTS_PER_PAGE];
-  int n_plots = 0;
-
-  bitmap_find_plots(bm, plots, &n_plots);
+  mtx = fz_scale(ZOOM, ZOOM);
 
   char plot_name[32];
+  char page_name[32];
 
-  for(int i = 0; i < n_plots; ++i){
+  for (int page_number = 1; page_number < page_count; ++page_number) {
 
-    sprintf(plot_name, "plots_%03d", i);
+    /* Render page to an RGB pixmap. */
+    fz_try(ctx)
+      pix = fz_new_pixmap_from_page_number(ctx, doc, page_number, mtx, fz_device_gray(ctx), 0);
+    fz_catch(ctx)
+    {
+      fprintf(stderr, "cannot render page: %s\n", fz_caught_message(ctx));
+      fz_drop_document(ctx, doc);
+      fz_drop_context(ctx);
+      return EXIT_FAILURE;
+    }
 
-    bitmap_print(plots[i], plot_name);
+    bitmap *bm = bitmap_from_pix(pix, THRESHOLD);
+
+    bitmap *plots[MAX_PLOTS_PER_PAGE];
+    int n_plots = 0;
+
+    bitmap_find_plots(bm, plots, &n_plots);
+
+    for(int i = 0; i < n_plots; ++i){
+
+      sprintf(plot_name, "page_%03d_plot_%03d", page_number, i);
+
+      bitmap_print(plots[i], plot_name);
+
+    }
+
+    sprintf(page_name, "page_%03d", page_number);
+
+    bitmap_print(bm, page_name);
+
+    /* Clean up. */
+    bitmap_destroy(bm);
+
+    for(int i = 0; i < n_plots; ++i)
+      bitmap_destroy(plots[i]);
+
+    fz_drop_pixmap(ctx, pix);
 
   }
 
-  bitmap_print(bm, "test");
-
-  bitmap_destroy(bm);
-
-  for(int i = 0; i < n_plots; ++i)
-    bitmap_destroy(plots[i]);
-
-  /* Clean up. */
-  fz_drop_pixmap(ctx, pix);
   fz_drop_document(ctx, doc);
   fz_drop_context(ctx);
   return EXIT_SUCCESS;
