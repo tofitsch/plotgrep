@@ -22,8 +22,6 @@ int main(int argc, char **argv) {
   fz_pixmap *pix;
   fz_matrix mtx;
 
-  int x, y;
-
   if (argc < 3) {
     fprintf(stderr, "usage: example input-file page-number\n");
     fprintf(stderr, "\tinput-file: path of PDF\n");
@@ -93,28 +91,16 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  /* Print image data in ascii PPM format. */
-//  printf("%d %d %d %li\n", pix->w, pix->h, pix->n, pix->stride);
-  printf("P1\n");
-  printf("%d %d\n", pix->w, pix->h);
-//  printf("255\n");
-  for (y = 0; y < pix->h; ++y)
-  {
-    unsigned char *p = &pix->samples[y * pix->stride];
-    for (x = 0; x < pix->w; ++x)
-    {
-      if (x > 0)
-        printf(" ");
-      //printf("%3d %3d %3d", p[0], p[1], p[2]);
-      printf("%d ", *p > 250);
-      p += pix->n;
-    }
-    printf("\n");
-  }
+  bitmap * bm = bitmap_from_pix(pix, 200);
+
+  bitmap_print(bm, "test");
+
+  bitmap_destroy(bm);
 
   /* Clean up. */
   fz_drop_pixmap(ctx, pix);
   fz_drop_document(ctx, doc);
   fz_drop_context(ctx);
   return EXIT_SUCCESS;
+
 }

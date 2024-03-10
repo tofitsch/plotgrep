@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <mupdf/fitz.h>
 
 typedef struct {
   
@@ -13,5 +15,10 @@ typedef struct {
 } bitmap;
 
 bitmap* bitmap_create(int, int);
+bitmap* bitmap_from_pix(fz_pixmap*, int);
+
+void bitmap_print(bitmap*, char*);
+
+void bitmap_destroy(bitmap*);
 
 #endif
