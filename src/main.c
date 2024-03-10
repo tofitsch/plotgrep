@@ -13,6 +13,8 @@
 
 #include "bitmap.h"
 
+#define THRESHOLD 200
+
 int main(int argc, char **argv) {
 
   int page_number, page_count;
@@ -91,11 +93,29 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  bitmap * bm = bitmap_from_pix(pix, 200);
+  bitmap *bm = bitmap_from_pix(pix, THRESHOLD);
+
+  bitmap *plots[MAX_PLOTS_PER_PAGE];
+  int n_plots = 0;
+
+  bitmap_find_plots(bm, plots, &n_plots);
+
+  char plot_name[32];
+
+  for(int i = 0; i < n_plots; ++i){
+
+    sprintf(plot_name, "plots_%03d", i);
+
+    bitmap_print(plots[i], plot_name);
+
+  }
 
   bitmap_print(bm, "test");
 
   bitmap_destroy(bm);
+
+  for(int i = 0; i < n_plots; ++i)
+    bitmap_destroy(plots[i]);
 
   /* Clean up. */
   fz_drop_pixmap(ctx, pix);
