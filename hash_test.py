@@ -20,7 +20,7 @@ def hash_hex_to_hash_array(hash_hex):
 # hash dictionary to store hash values on images
 image_hash_dict = {}
 
-image_names = sorted(glob.glob('test/*.png'))
+image_names = sorted(glob.glob('page*plot*.ppm')) + ['test.ppm']
 
 for name in image_names:
   img = cv2.imread(name)
@@ -44,11 +44,10 @@ for name in image_names:
 print(image_hash_dict)
 
 for image_name in image_hash_dict.keys():
-  print(hash_hex_to_hash_array(image_hash_dict[image_name]))
   distance = hamming(
 #    hash_hex_to_hash_array(image_hash_dict[image_name]),
 #    hash_hex_to_hash_array(image_hash_dict['test/test.png'])
     hash_hex_to_hash_array(image_hash_dict[image_name]),
-    hash_hex_to_hash_array(image_hash_dict['test/test.png'])
+    hash_hex_to_hash_array(image_hash_dict['test.ppm'])
   )
   print("{0:<30} {1}".format(image_name, distance))
