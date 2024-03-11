@@ -16,9 +16,9 @@
 #define PDF_ZOOM 2
 #define THRESHOLD 200
 #define TMP_FILE "tmp.png"
-#define DCT_DIMENSION 8
+#define DCT_DIMENSION 16
 
-bitmap* get_plot_from_screen(){
+bitmap* get_plot_from_screen_grab(){
   
   int n_plots = 0;
   bitmap *plots[MAX_PLOTS_PER_PAGE];
@@ -55,9 +55,9 @@ bitmap* get_plot_from_screen(){
 
 int main(int argc, char **argv) {
   
-  bitmap *bm_screen = get_plot_from_screen();
+  bitmap *plot_screen_grab = get_plot_from_screen_grab();
 
-  bitmap *dct_screen = discrete_cosine_transform(bm_screen, DCT_DIMENSION);
+  bitmap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
 
   char plot_name[32];
   char page_name[32];
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 
       bitmap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
 
-      printf("dist: %d\n", bitmap_hamming_distance(dct, dct_screen));
+      printf("dist: %d\n", bitmap_hamming_distance(dct, dct_screen_grab));
 
       bitmap_destroy(dct);
 
@@ -167,8 +167,8 @@ int main(int argc, char **argv) {
 
   }
 
-  bitmap_destroy(bm_screen);
-  bitmap_destroy(dct_screen);
+  bitmap_destroy(plot_screen_grab);
+  bitmap_destroy(dct_screen_grab);
 
   fz_drop_document(ctx, doc);
   fz_drop_context(ctx);
