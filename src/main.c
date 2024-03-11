@@ -13,10 +13,55 @@
 
 #include "bitmap.h"
 
-#define ZOOM 2
+#define PDF_ZOOM 2
 #define THRESHOLD 200
+#define TMP_FILE "tmp.png"
 
 int main(int argc, char **argv) {
+
+  char plot_name[32];
+  char page_name[32];
+
+  bitmap *plots[MAX_PLOTS_PER_PAGE];
+  int n_plots = 0;
+  
+  if (argc == 1) {
+    
+    printf("select plot to search\n");
+
+    char command[] = "import -depth 8 -colorspace gray ";
+
+    char *full_command = (char *) calloc((strlen(command) + strlen(TMP_FILE) + 1), sizeof(char));
+
+    strcat(full_command, command);
+    strcat(full_command, TMP_FILE);
+
+    system(full_command); //TODO: remove system call
+
+    bitmap *bm = bitmap_from_png(TMP_FILE, THRESHOLD);
+
+    remove(TMP_FILE); //TODO: remove system call
+
+    bitmap_find_plots(bm, plots, &n_plots);
+
+    for(int i = 0; i < n_plots; ++i){
+
+      sprintf(plot_name, "pngtest_plot_%03d", i);
+
+      bitmap_print(plots[i], plot_name);
+
+    }
+
+    bitmap_print(bm, "pngtest");
+
+    for(int i = 0; i < n_plots; ++i)
+      bitmap_destroy(plots[i]);
+
+    bitmap_destroy(bm);
+
+    return EXIT_SUCCESS;
+
+  }
 
   int page_count;
 
@@ -58,6 +103,8 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  printf("reading plots from %s\n", argv[1]);
+
   /* Count the number of pages. */
   fz_try(ctx)
     page_count = fz_count_pages(ctx, doc);
@@ -69,12 +116,11 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  mtx = fz_scale(ZOOM, ZOOM);
-
-  char plot_name[32];
-  char page_name[32];
+  mtx = fz_scale(PDF_ZOOM, PDF_ZOOM);
 
   for (int page_number = 1; page_number < page_count; ++page_number) {
+
+    n_plots = 0;
 
     /* Render page to an RGB pixmap. */
     fz_try(ctx)
@@ -88,9 +134,6 @@ int main(int argc, char **argv) {
     }
 
     bitmap *bm = bitmap_from_pix(pix, THRESHOLD);
-
-    bitmap *plots[MAX_PLOTS_PER_PAGE];
-    int n_plots = 0;
 
     bitmap_find_plots(bm, plots, &n_plots);
 

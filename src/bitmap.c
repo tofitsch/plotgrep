@@ -41,6 +41,82 @@ bitmap* bitmap_from_pix(fz_pixmap *pix, int threshold) {
 
 }
 
+bitmap* bitmap_from_png(char *file_name, int threshold) {
+  
+  FILE * file = fopen(file_name, "r");
+
+  unsigned char header[PNG_HEADER_BYTES];
+
+  fread(header, 1, PNG_HEADER_BYTES, file);
+
+  if (png_sig_cmp(header, 0, PNG_HEADER_BYTES)) {
+    fclose(file);
+    fprintf(stderr, "Error: %s is not a valid PNG file\n", file_name);
+    return NULL;
+  }
+
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+  if (!png_ptr) {
+    fclose(file);
+    fprintf(stderr, "Error: png_create_read_struct failed\n");
+    return NULL;
+  }
+
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+
+  if (!info_ptr) {
+    png_destroy_read_struct(&png_ptr, NULL, NULL);
+    fclose(file);
+    fprintf(stderr, "Error: png_create_info_struct failed\n");
+    return NULL;
+  }
+
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    fclose(file);
+    fprintf(stderr, "Error: Error during PNG read\n");
+    return NULL;
+  }
+
+  png_init_io(png_ptr, file);
+  png_set_sig_bytes(png_ptr, PNG_HEADER_BYTES);
+  png_read_info(png_ptr, info_ptr);
+
+  png_byte color_type = png_get_color_type(png_ptr, info_ptr);
+  png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+
+  int w = png_get_image_width(png_ptr, info_ptr);
+  int h = png_get_image_height(png_ptr, info_ptr);
+
+  if (color_type != PNG_COLOR_TYPE_GRAY || bit_depth != 8) {
+    fclose(file);
+    fprintf(stderr, "Error: Only 8-bit grayscale PNG images are supported\nUse `import -depth 8 -colorspace gray test.png`");
+    return NULL;
+  }
+
+  bitmap *bm = bitmap_create(w, h);
+
+  png_bytep row_data = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
+
+  for (int y = 0; y < h; y++) {
+
+    png_read_row(png_ptr, row_data, NULL);
+
+    for (int x = 0; x < w; x++){
+      bm->data[y][x] = row_data[x] > threshold ? 0 : 1;
+    }
+
+  }
+
+  free(row_data);
+  png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+  fclose(file);
+
+  return bm;
+
+}
+
 bitmap* bitmap_from_bitmap(bitmap *bm, int offset_x, int offset_y, int w, int h) {
   
   bitmap *new_bm = bitmap_create(w, h);

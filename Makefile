@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -I./include
-LIBS = -lmupdf -lmupdf-third -lfreetype -lharfbuzz -ljpeg -lz -lopenjp2 -ljbig2dec -lm
+LIBS = -lmupdf -lmupdf-third -lfreetype -lharfbuzz -ljpeg -lpng -lz -lopenjp2 -ljbig2dec -lm
 LDFLAGS = -L/usr/lib/x86_64-linux-gnu
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c,build/%.o,$(SRC))
