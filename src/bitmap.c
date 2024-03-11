@@ -254,6 +254,66 @@ bool bitmap_rectangles_overlap(int x1, int y1, int w1, int h1, int x2, int y2, i
 
 }
 
+bitmap* discrete_cosine_transform(bitmap* bm, int d){
+  //2D DCT as defined in: https://doi.org/10.1117/12.853142
+
+  int N = bm->w < bm->h ? bm->w : bm->h;
+
+  bitmap *dct = bitmap_create(d, d);
+
+  for (int u = 0; u < d ; ++u) {
+    for (int v = 0; v < d; ++v) {
+
+      float F = 0.;
+
+      for (int x = 0; x < N ; ++x) {
+        for (int y = 0; y < N ; ++y) {
+          
+          float f = (x < bm->w && y < bm->h) ? bm->data[y][x] : 0.;
+
+          F += f * cos((2. * x + 1.) * u * M_PI / (2. * N)) * cos((2. * y + 1.) * v * M_PI / (2. * N));
+
+        }
+      }
+      
+      float alpha_u = 1. / sqrt((float) N);
+      float alpha_v = 1. / sqrt((float) N);
+
+      if(u > 0)
+        alpha_u *= sqrt(2);
+
+      if(v > 0)
+        alpha_v *= sqrt(2);
+
+      F *= alpha_u * alpha_v;
+
+      dct->data[v][u] = F > 0. ? 0 : 1;
+
+    }
+  }
+
+  return dct;
+
+}
+
+int bitmap_hamming_distance(bitmap *a, bitmap *b) {
+    
+    if(a->w != b->w || a->h != b->h){
+      fprintf(stderr, "Error: in bitmap_hamming_distance: bitmaps must have same dimensions\n");
+      return -1;
+    }
+
+    int dist = 0;
+
+    for (int y = 0; y < a->h; y++)
+      for (int x = 0; x < a->w; x++)
+        if (a->data[y][x] != b->data[y][x])
+          dist++;
+
+    return dist;
+
+}
+
 void bitmap_destroy(bitmap* bm) {
 
   if (bm == NULL)

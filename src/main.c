@@ -16,52 +16,54 @@
 #define PDF_ZOOM 2
 #define THRESHOLD 200
 #define TMP_FILE "tmp.png"
+#define DCT_DIMENSION 8
+
+bitmap* get_plot_from_screen(){
+  
+  int n_plots = 0;
+  bitmap *plots[MAX_PLOTS_PER_PAGE];
+
+  printf("select plot to search\n");
+
+  char command[] = "import -depth 8 -colorspace gray ";
+
+  char *full_command = (char *) calloc((strlen(command) + strlen(TMP_FILE) + 1), sizeof(char));
+
+  strcat(full_command, command);
+  strcat(full_command, TMP_FILE);
+
+  system(full_command); //TODO: remove system call
+
+  bitmap *bm = bitmap_from_png(TMP_FILE, THRESHOLD);
+
+  remove(TMP_FILE); //TODO: remove system call
+  
+  bitmap_find_plots(bm, plots, &n_plots); //TODO: use all plots found rather than just return first
+
+  bitmap_print(plots[0], "pngtest_plot");
+
+  bitmap_print(bm, "pngtest");
+
+  for(int i = 1; i < n_plots; ++i) //TODO: when doing loop over all plots, note the start from 1
+    bitmap_destroy(plots[i]);
+
+  bitmap_destroy(bm);
+
+  return plots[0];
+
+}
 
 int main(int argc, char **argv) {
+  
+  bitmap *bm_screen = get_plot_from_screen();
+
+  bitmap *dct_screen = discrete_cosine_transform(bm_screen, DCT_DIMENSION);
 
   char plot_name[32];
   char page_name[32];
 
   bitmap *plots[MAX_PLOTS_PER_PAGE];
   int n_plots = 0;
-  
-  if (argc == 1) {
-    
-    printf("select plot to search\n");
-
-    char command[] = "import -depth 8 -colorspace gray ";
-
-    char *full_command = (char *) calloc((strlen(command) + strlen(TMP_FILE) + 1), sizeof(char));
-
-    strcat(full_command, command);
-    strcat(full_command, TMP_FILE);
-
-    system(full_command); //TODO: remove system call
-
-    bitmap *bm = bitmap_from_png(TMP_FILE, THRESHOLD);
-
-    remove(TMP_FILE); //TODO: remove system call
-
-    bitmap_find_plots(bm, plots, &n_plots);
-
-    for(int i = 0; i < n_plots; ++i){
-
-      sprintf(plot_name, "pngtest_plot_%03d", i);
-
-      bitmap_print(plots[i], plot_name);
-
-    }
-
-    bitmap_print(bm, "pngtest");
-
-    for(int i = 0; i < n_plots; ++i)
-      bitmap_destroy(plots[i]);
-
-    bitmap_destroy(bm);
-
-    return EXIT_SUCCESS;
-
-  }
 
   int page_count;
 
@@ -143,6 +145,12 @@ int main(int argc, char **argv) {
 
       bitmap_print(plots[i], plot_name);
 
+      bitmap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
+
+      printf("dist: %d\n", bitmap_hamming_distance(dct, dct_screen));
+
+      bitmap_destroy(dct);
+
     }
 
     sprintf(page_name, "page_%03d", page_number);
@@ -158,6 +166,9 @@ int main(int argc, char **argv) {
     fz_drop_pixmap(ctx, pix);
 
   }
+
+  bitmap_destroy(bm_screen);
+  bitmap_destroy(dct_screen);
 
   fz_drop_document(ctx, doc);
   fz_drop_context(ctx);

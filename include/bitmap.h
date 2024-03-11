@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include <png.h>
 #include <mupdf/fitz.h>
 
@@ -21,14 +22,19 @@ typedef struct {
 } bitmap;
 
 bitmap* bitmap_create(int, int);
+
 bitmap* bitmap_from_pix(fz_pixmap*, int);
 bitmap* bitmap_from_png(char*, int);
 bitmap* bitmap_from_bitmap(bitmap*, int, int, int, int);
+
+bitmap* discrete_cosine_transform(bitmap*, int);
 
 void bitmap_print(bitmap*, char*);
 void bitmap_find_plots(bitmap*, bitmap* [], int*);
 
 bool bitmap_rectangles_overlap(int, int, int, int, int, int, int, int);
+
+int bitmap_hamming_distance(bitmap*, bitmap*);
 
 void bitmap_destroy(bitmap*);
 
