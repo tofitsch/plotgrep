@@ -67,7 +67,8 @@ int main(int argc, char **argv) {
 
   bm_BitMap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
 
-  bm_to_hex(dct_screen_grab);
+  char *hex = bm_to_hex(dct_screen_grab); //XXX
+  bm_BitMap *test = bm_from_hex(hex, DCT_DIMENSION, DCT_DIMENSION); //XXX
   exit(0);
 
   char plot_name[32];

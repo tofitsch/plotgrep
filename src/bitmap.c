@@ -304,44 +304,62 @@ int bm_hamming_distance(bm_BitMap *a, bm_BitMap *b) {
 
 char* bm_to_hex(bm_BitMap* bm){
   
-  char c;
+  int n_bits = bm->w * bm->h;
+
+  char *str = (char*) calloc((n_bits + 1), sizeof(char));
+
+  str[n_bits] = '\0';
+
+  int i = 0;
   
-//  for(int i = 0; i < bm->h * bm->w; i += 4) {
-//
-//    bits_to_hex(bm->data[i], &c);
-//
-//    printf("%c", c);
-//
-//  }
-
-  for (int y = 0; y < bm->h; y++) {
-
-    for (int x = 0; x < bm->w; x++)
-      printf("%d", bm->data[y][x]);
-
-    printf("\n");
-
-  }
-
   for (int y = 0; y < bm->h; y++) {
 
     for (int x = 0; x < bm->w; x += 4) {
 
-      bits_to_hex(&bm->data[y][x], &c);
+      bits_to_hex(&bm->data[y][x], &str[i]);
 
-      printf("%c", c);
+      ++i;
 
     }
 
   }
 
-  printf("\n");
+  return str;
 
 }
 
 bm_BitMap* bm_from_hex(char* c, int w, int h){
   
-  //TODO
+  bm_BitMap *bm = bm_create(w, h);
+
+  //bm->x = ? TODO: store x and y of bitmaps?
+  
+  int i = 0;
+  
+  for (int y = 0; y < h; y++) {
+
+    for (int x = 0; x < w; x += 4) {
+
+      hex_to_bits(&bm->data[y][x], &c[i]);
+
+      ++i;
+
+    }
+
+  }
+
+  for (int y = 0; y < bm->h; y++) {
+
+    for (int x = 0; x < bm->w; ++x) {
+       
+       printf("%d", bm->data[y][x]);
+    }
+
+    printf("\n");
+
+  }
+
+  return bm;
 
 }
 
