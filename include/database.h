@@ -3,10 +3,15 @@
 
 typedef struct {
 
-  int doc, page, plot, dist;
+  int dist;
+
+  char *name;
+  char *hex;
 
 } db_Entry;
 
-int db_by_dist(const void*, const void*);
+int db_by_dist(const void*, const void*t);
+
+void db_destroy_entry(db_Entry*);
 
 #endif

@@ -8,3 +8,10 @@ int db_by_dist(const void * a, const void * b) {
   return A->dist < B->dist;
 
 }
+
+void db_destroy_entry(db_Entry *e){
+
+  free(e->hex);
+  free(e->name);
+
+}

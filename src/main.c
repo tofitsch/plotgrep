@@ -82,10 +82,6 @@ int main(int argc, char **argv) {
 //  }
 //
 //  bm_destroy(test); //XXX
-
-  char plot_name[32];
-  char page_name[32];
-
   bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
   int n_plots = 0;
 
@@ -167,13 +163,14 @@ int main(int argc, char **argv) {
 
       for(int i = 0; i < n_plots; ++i){
 
+        char *plot_name = (char *) calloc(strlen("doc_XXXX_page_XXXX_plot_XXXX"), sizeof(char));
+
         sprintf(plot_name, "doc_%03d_page_%03d_plot_%03d", d + 1, page_number + 1, i + 1);
 
         bm_BitMap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
 
         char *hex = bm_to_hex(dct); //XXX
         printf("%s\n", hex);
-        free(hex); //XXX
          
         int dist = bm_hamming_distance(dct, dct_screen_grab);
 
@@ -185,13 +182,15 @@ int main(int argc, char **argv) {
         if(DEBUG)
           bm_print(plots[i], plot_name);
 
-        db[n_db].doc = d + 1;
-        db[n_db].page = page_number + 1;
-        db[n_db].plot = i + 1;
         db[n_db].dist = dist;
+        db[n_db].hex = hex;
+        db[n_db].name = plot_name;
+
         n_db++;
 
       }
+
+      char page_name[32];
 
       sprintf(page_name, "doc_%03d_page_%03d", d + 1, page_number + 1);
 
@@ -220,7 +219,10 @@ int main(int argc, char **argv) {
   qsort(db, n_db, sizeof(db_Entry), db_by_dist);
 
   for(int i = 0; i < n_db ; ++i)
-    printf("%d\t %s page %d plot %d\n", db[i].dist, argv[db[i].doc], db[i].page, db[i].plot);
+    printf("%04d %s %s\n", db[i].dist, db[i].hex, db[i].name);
+
+  for(int i = 0; i < n_db ; ++i)
+    db_destroy_entry(&db[i]);
 
   return EXIT_SUCCESS;
 
