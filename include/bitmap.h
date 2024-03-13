@@ -21,24 +21,24 @@ typedef struct {
 
   bool **data;
 
-} bitmap;
+} bm_BitMap;
 
-bitmap* bitmap_create(int, int);
+bm_BitMap* bm_create(int, int);
 
-bitmap* bitmap_from_pix(fz_pixmap*, int);
-bitmap* bitmap_from_png(char*, int);
-bitmap* bitmap_from_bitmap(bitmap*, int, int, int, int);
+bm_BitMap* bm_from_pix(fz_pixmap*, int);
+bm_BitMap* bm_from_png(char*, int);
+bm_BitMap* bm_from_bm(bm_BitMap*, int, int, int, int);
 
-bitmap* discrete_cosine_transform(bitmap*, int);
+bm_BitMap* discrete_cosine_transform(bm_BitMap*, int);
 
-void bitmap_print(bitmap*, char*);
-void bitmap_find_plots(bitmap*, bitmap* [], int*);
+void bm_print(bm_BitMap*, char*);
+void bm_find_plots(bm_BitMap*, bm_BitMap* [], int*);
 
-char* bitmap_to_hex(bitmap*);
-bitmap* bitmap_from_hex(char*, int, int);
+char* bm_to_hex(bm_BitMap*);
+bm_BitMap* bm_from_hex(char*, int, int);
 
-int bitmap_hamming_distance(bitmap*, bitmap*);
+int bm_hamming_distance(bm_BitMap*, bm_BitMap*);
 
-void bitmap_destroy(bitmap*);
+void bm_destroy(bm_BitMap*);
 
 #endif

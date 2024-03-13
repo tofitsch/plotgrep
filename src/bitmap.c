@@ -1,8 +1,8 @@
 #include "bitmap.h"
 
-bitmap* bitmap_create(int w, int h) {
+bm_BitMap* bm_create(int w, int h) {
 
-  bitmap *bm = (bitmap*) malloc(sizeof(bitmap));
+  bm_BitMap *bm = (bm_BitMap*) malloc(sizeof(bm));
 
   bm->x = 0;
   bm->y = 0;
@@ -19,9 +19,9 @@ bitmap* bitmap_create(int w, int h) {
 
 }
 
-bitmap* bitmap_from_pix(fz_pixmap *pix, int threshold) {
+bm_BitMap* bm_from_pix(fz_pixmap *pix, int threshold) {
   
-  bitmap *bm = bitmap_create(pix->w, pix->h);
+  bm_BitMap *bm = bm_create(pix->w, pix->h);
 
   for (int y = 0; y < pix->h; ++y) {
 
@@ -41,7 +41,7 @@ bitmap* bitmap_from_pix(fz_pixmap *pix, int threshold) {
 
 }
 
-bitmap* bitmap_from_png(char *file_name, int threshold) {
+bm_BitMap* bm_from_png(char *file_name, int threshold) {
   
   FILE * file = fopen(file_name, "r");
 
@@ -95,7 +95,7 @@ bitmap* bitmap_from_png(char *file_name, int threshold) {
     return NULL;
   }
 
-  bitmap *bm = bitmap_create(w, h);
+  bm_BitMap *bm = bm_create(w, h);
 
   png_bytep row_data = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
 
@@ -117,9 +117,9 @@ bitmap* bitmap_from_png(char *file_name, int threshold) {
 
 }
 
-bitmap* bitmap_from_bitmap(bitmap *bm, int offset_x, int offset_y, int w, int h) {
+bm_BitMap* bm_from_bm(bm_BitMap *bm, int offset_x, int offset_y, int w, int h) {
   
-  bitmap *new_bm = bitmap_create(w, h);
+  bm_BitMap *new_bm = bm_create(w, h);
 
   new_bm->x = offset_x;
   new_bm->y = offset_y;
@@ -132,7 +132,7 @@ bitmap* bitmap_from_bitmap(bitmap *bm, int offset_x, int offset_y, int w, int h)
 
 }
 
-void bitmap_print(bitmap *bm, char * prefix){
+void bm_print(bm_BitMap *bm, char * prefix){
   
   char suffix[] = ".ppm"; 
 
@@ -168,7 +168,7 @@ void bitmap_print(bitmap *bm, char * prefix){
 
 }
 
-void bitmap_find_plots(bitmap *bm, bitmap *plots[], int *n_plots){
+void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
   
   *n_plots = 0;
 
@@ -231,7 +231,7 @@ void bitmap_find_plots(bitmap *bm, bitmap *plots[], int *n_plots){
           if(rectangles_overlap(x, y, w_max_area, h_max_area, plots[i]->x, plots[i]->y, plots[i]->w, plots[i]->h))
             goto next;
 
-        plots[(*n_plots)++] = bitmap_from_bitmap(bm, x, y, w_max_area, h_max_area);
+        plots[(*n_plots)++] = bm_from_bm(bm, x, y, w_max_area, h_max_area);
 
       }
 
@@ -242,12 +242,12 @@ void bitmap_find_plots(bitmap *bm, bitmap *plots[], int *n_plots){
 
 }
 
-bitmap* discrete_cosine_transform(bitmap* bm, int d){
+bm_BitMap* discrete_cosine_transform(bm_BitMap* bm, int d){
   //2D DCT as defined in: https://doi.org/10.1117/12.853142
 
   int N = bm->w < bm->h ? bm->w : bm->h;
 
-  bitmap *dct = bitmap_create(d, d);
+  bm_BitMap *dct = bm_create(d, d);
 
   for (int u = 0; u < d ; ++u) {
     for (int v = 0; v < d; ++v) {
@@ -284,10 +284,10 @@ bitmap* discrete_cosine_transform(bitmap* bm, int d){
 
 }
 
-int bitmap_hamming_distance(bitmap *a, bitmap *b) {
+int bm_hamming_distance(bm_BitMap *a, bm_BitMap *b) {
     
     if(a->w != b->w || a->h != b->h){
-      fprintf(stderr, "Error: in bitmap_hamming_distance: bitmaps must have same dimensions\n");
+      fprintf(stderr, "Error: in bm_hamming_distance: bms must have same dimensions\n");
       return -1;
     }
 
@@ -302,7 +302,7 @@ int bitmap_hamming_distance(bitmap *a, bitmap *b) {
 
 }
 
-char* bitmap_to_hex(bitmap* bm){
+char* bm_to_hex(bm_BitMap* bm){
   
   char c;
   
@@ -339,13 +339,13 @@ char* bitmap_to_hex(bitmap* bm){
 
 }
 
-bitmap* bitmap_from_hex(char* c, int w, int h){
+bm_BitMap* bm_from_hex(char* c, int w, int h){
   
   //TODO
 
 }
 
-void bitmap_destroy(bitmap* bm) {
+void bm_destroy(bm_BitMap* bm) {
 
   if (bm == NULL)
     return;

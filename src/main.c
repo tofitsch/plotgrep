@@ -21,10 +21,10 @@
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
 #define MAX_DB_ENTRIES 128
 
-bitmap* get_plot_from_screen_grab(){
+bm_BitMap* get_plot_from_screen_grab(){
   
   int n_plots = 0;
-  bitmap *plots[MAX_PLOTS_PER_PAGE];
+  bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
 
   printf("select plot to search\n");
 
@@ -37,22 +37,22 @@ bitmap* get_plot_from_screen_grab(){
 
   system(full_command); //TODO: remove system call
 
-  bitmap *bm = bitmap_from_png(TMP_FILE, THRESHOLD);
+  bm_BitMap *bm = bm_from_png(TMP_FILE, THRESHOLD);
 
   remove(TMP_FILE); //TODO: remove system call
   
-  bitmap_find_plots(bm, plots, &n_plots); //TODO: use all plots found rather than just return first
+  bm_find_plots(bm, plots, &n_plots); //TODO: use all plots found rather than just return first
 
   if(DEBUG)
-    bitmap_print(plots[0], "pngtest_plot");
+    bm_print(plots[0], "pngtest_plot");
 
   if(DEBUG)
-    bitmap_print(bm, "pngtest");
+    bm_print(bm, "pngtest");
 
   for(int i = 1; i < n_plots; ++i) //TODO: when doing loop over all plots, note the start from 1
-    bitmap_destroy(plots[i]);
+    bm_destroy(plots[i]);
 
-  bitmap_destroy(bm);
+  bm_destroy(bm);
 
   return plots[0];
 
@@ -63,17 +63,17 @@ int main(int argc, char **argv) {
   int n_db = 0;
   db_Entry db[MAX_DB_ENTRIES];
   
-  bitmap *plot_screen_grab = get_plot_from_screen_grab();
+  bm_BitMap *plot_screen_grab = get_plot_from_screen_grab();
 
-  bitmap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
+  bm_BitMap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
 
-  bitmap_to_hex(dct_screen_grab);
+  bm_to_hex(dct_screen_grab);
   exit(0);
 
   char plot_name[32];
   char page_name[32];
 
-  bitmap *plots[MAX_PLOTS_PER_PAGE];
+  bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
   int n_plots = 0;
 
   int page_count;
@@ -148,25 +148,25 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
       }
 
-      bitmap *bm = bitmap_from_pix(pix, THRESHOLD);
+      bm_BitMap *bm = bm_from_pix(pix, THRESHOLD);
 
-      bitmap_find_plots(bm, plots, &n_plots);
+      bm_find_plots(bm, plots, &n_plots);
 
       for(int i = 0; i < n_plots; ++i){
 
         sprintf(plot_name, "doc_%03d_page_%03d_plot_%03d", d + 1, page_number + 1, i + 1);
 
-        bitmap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
+        bm_BitMap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
          
-        int dist = bitmap_hamming_distance(dct, dct_screen_grab);
+        int dist = bm_hamming_distance(dct, dct_screen_grab);
 
         if(DEBUG)
           printf("dist: %d\n", dist);
 
-        bitmap_destroy(dct);
+        bm_destroy(dct);
 
         if(DEBUG)
-          bitmap_print(plots[i], plot_name);
+          bm_print(plots[i], plot_name);
 
         db[n_db].doc = d + 1;
         db[n_db].page = page_number + 1;
@@ -179,13 +179,13 @@ int main(int argc, char **argv) {
       sprintf(page_name, "doc_%03d_page_%03d", d + 1, page_number + 1);
 
       if(DEBUG)
-        bitmap_print(bm, page_name);
+        bm_print(bm, page_name);
 
       /* Clean up. */
-      bitmap_destroy(bm);
+      bm_destroy(bm);
 
       for(int i = 0; i < n_plots; ++i)
-        bitmap_destroy(plots[i]);
+        bm_destroy(plots[i]);
 
       fz_drop_pixmap(ctx, pix);
 
@@ -197,8 +197,8 @@ int main(int argc, char **argv) {
 
   }
 
-  bitmap_destroy(plot_screen_grab);
-  bitmap_destroy(dct_screen_grab);
+  bm_destroy(plot_screen_grab);
+  bm_destroy(dct_screen_grab);
 
   qsort(db, n_db, sizeof(db_Entry), db_by_dist);
 
