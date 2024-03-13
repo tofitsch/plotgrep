@@ -228,7 +228,7 @@ void bitmap_find_plots(bitmap *bm, bitmap *plots[], int *n_plots){
       if (max_area > 0) {
         
         for (int i = 0; i < *n_plots; ++i)
-          if(bitmap_rectangles_overlap(x, y, w_max_area, h_max_area, plots[i]->x, plots[i]->y, plots[i]->w, plots[i]->h))
+          if(rectangles_overlap(x, y, w_max_area, h_max_area, plots[i]->x, plots[i]->y, plots[i]->w, plots[i]->h))
             goto next;
 
         plots[(*n_plots)++] = bitmap_from_bitmap(bm, x, y, w_max_area, h_max_area);
@@ -239,18 +239,6 @@ void bitmap_find_plots(bitmap *bm, bitmap *plots[], int *n_plots){
 
     }
   }
-
-}
-
-bool bitmap_rectangles_overlap(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
-
-    if (x1 >= x2 + w2 || x2 >= x1 + w1)
-      return false;
-
-    if (y1 >= y2 + h2 || y2 >= y1 + h1)
-      return false;
-
-    return true;
 
 }
 
@@ -305,12 +293,55 @@ int bitmap_hamming_distance(bitmap *a, bitmap *b) {
 
     int dist = 0;
 
-    for (int y = 0; y < a->h; y++)
-      for (int x = 0; x < a->w; x++)
+    for (int y = 0; y < a->h; ++y)
+      for (int x = 0; x < a->w; ++x)
         if (a->data[y][x] != b->data[y][x])
           dist++;
 
     return dist;
+
+}
+
+char* bitmap_to_hex(bitmap* bm){
+  
+  char c;
+  
+//  for(int i = 0; i < bm->h * bm->w; i += 4) {
+//
+//    bits_to_hex(bm->data[i], &c);
+//
+//    printf("%c", c);
+//
+//  }
+
+  for (int y = 0; y < bm->h; y++) {
+
+    for (int x = 0; x < bm->w; x++)
+      printf("%d", bm->data[y][x]);
+
+    printf("\n");
+
+  }
+
+  for (int y = 0; y < bm->h; y++) {
+
+    for (int x = 0; x < bm->w; x += 4) {
+
+      bits_to_hex(&bm->data[y][x], &c);
+
+      printf("%c", c);
+
+    }
+
+  }
+
+  printf("\n");
+
+}
+
+bitmap* bitmap_from_hex(char* c, int w, int h){
+  
+  //TODO
 
 }
 

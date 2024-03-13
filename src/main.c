@@ -12,29 +12,14 @@
 #include <mupdf/fitz.h>
 
 #include "bitmap.h"
+#include "database.h"
 
 #define DEBUG false
 #define PDF_ZOOM 2
 #define THRESHOLD 200
 #define TMP_FILE "tmp.png"
-#define DCT_DIMENSION 16
+#define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
 #define MAX_DB_ENTRIES 128
-
-//TODO: refactor
-typedef struct {
-
-  int doc, page, plot, dist;
-
-} dbentry;
-
-int by_dist(const void * a, const void * b) {
-
-  const dbentry * A = (const dbentry *) a;
-  const dbentry * B = (const dbentry *) b;
-
-  return A->dist < B->dist;
-
-}
 
 bitmap* get_plot_from_screen_grab(){
   
@@ -76,11 +61,14 @@ bitmap* get_plot_from_screen_grab(){
 int main(int argc, char **argv) {
   
   int n_db = 0;
-  dbentry db[MAX_DB_ENTRIES];
+  db_Entry db[MAX_DB_ENTRIES];
   
   bitmap *plot_screen_grab = get_plot_from_screen_grab();
 
   bitmap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
+
+  bitmap_to_hex(dct_screen_grab);
+  exit(0);
 
   char plot_name[32];
   char page_name[32];
@@ -212,7 +200,7 @@ int main(int argc, char **argv) {
   bitmap_destroy(plot_screen_grab);
   bitmap_destroy(dct_screen_grab);
 
-  qsort(db, n_db, sizeof(dbentry), by_dist);
+  qsort(db, n_db, sizeof(db_Entry), db_by_dist);
 
   for(int i = 0; i < n_db ; ++i)
     printf("%d\t %s page %d plot %d\n", db[i].dist, argv[db[i].doc], db[i].page, db[i].plot);

@@ -8,6 +8,8 @@
 #include <png.h>
 #include <mupdf/fitz.h>
 
+#include "misc.h"
+
 #define MIN_PLOT_AREA 1000
 #define MAX_PLOT_ASPECT_RATIO 5
 #define MAX_PLOTS_PER_PAGE 100
@@ -32,7 +34,8 @@ bitmap* discrete_cosine_transform(bitmap*, int);
 void bitmap_print(bitmap*, char*);
 void bitmap_find_plots(bitmap*, bitmap* [], int*);
 
-bool bitmap_rectangles_overlap(int, int, int, int, int, int, int, int);
+char* bitmap_to_hex(bitmap*);
+bitmap* bitmap_from_hex(char*, int, int);
 
 int bitmap_hamming_distance(bitmap*, bitmap*);
 
