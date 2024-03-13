@@ -348,17 +348,6 @@ bm_BitMap* bm_from_hex(char* c, int w, int h){
 
   }
 
-  for (int y = 0; y < bm->h; y++) {
-
-    for (int x = 0; x < bm->w; ++x) {
-       
-       printf("%d", bm->data[y][x]);
-    }
-
-    printf("\n");
-
-  }
-
   return bm;
 
 }

@@ -67,9 +67,21 @@ int main(int argc, char **argv) {
 
   bm_BitMap *dct_screen_grab = discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
 
-  char *hex = bm_to_hex(dct_screen_grab); //XXX
-  bm_BitMap *test = bm_from_hex(hex, DCT_DIMENSION, DCT_DIMENSION); //XXX
-  exit(0);
+  char *hex = bm_to_hex(dct_screen_grab);
+  printf("%s\n", hex);
+  free(hex);
+//  bm_BitMap *test = bm_from_hex(hex, DCT_DIMENSION, DCT_DIMENSION); //XXX
+//  for (int y = 0; y < test->h; y++) {
+//    for (int x = 0; x < test->w; ++x) {
+//       
+//       printf("%d", test->data[y][x]);
+//    }
+//
+//    printf("\n");
+//
+//  }
+//
+//  bm_destroy(test); //XXX
 
   char plot_name[32];
   char page_name[32];
@@ -158,6 +170,10 @@ int main(int argc, char **argv) {
         sprintf(plot_name, "doc_%03d_page_%03d_plot_%03d", d + 1, page_number + 1, i + 1);
 
         bm_BitMap *dct = discrete_cosine_transform(plots[i], DCT_DIMENSION);
+
+        char *hex = bm_to_hex(dct); //XXX
+        printf("%s\n", hex);
+        free(hex); //XXX
          
         int dist = bm_hamming_distance(dct, dct_screen_grab);
 
