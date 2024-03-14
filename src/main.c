@@ -54,6 +54,8 @@ bm_BitMap* get_plot_from_screen_grab() {
 
   bm_destroy(bm);
 
+  free(full_command);
+
   return plots[0];
 
 }
