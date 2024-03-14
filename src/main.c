@@ -121,6 +121,13 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
 
     bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
 
+    char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
+
+    sprintf(page_name, "%s page_%03d", file_name, p + 1);
+
+    if(DEBUG)
+      bm_print(bm, page_name);
+
     bm_find_plots(bm, plots, &n_plots);
 
     for(int i = 0; i < n_plots; ++i){
@@ -147,13 +154,6 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
       bm_destroy(dct);
 
     }
-
-    char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
-
-    sprintf(page_name, "%s page_%03d", file_name, p + 1);
-
-    if(DEBUG)
-      bm_print(bm, page_name);
 
     bm_destroy(bm);
 
