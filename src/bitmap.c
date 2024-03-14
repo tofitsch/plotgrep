@@ -242,7 +242,7 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
 
 }
 
-bm_BitMap* discrete_cosine_transform(bm_BitMap* bm, int d){
+bm_BitMap* bm_discrete_cosine_transform(bm_BitMap* bm, int d){
   //2D DCT as defined in: https://doi.org/10.1117/12.853142
 
   int N = bm->w < bm->h ? bm->w : bm->h;

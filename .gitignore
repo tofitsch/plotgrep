@@ -4,6 +4,7 @@ axv
 
 *.pdf
 *.ppm
+*.csv
 
 *.swp
 *.swo
