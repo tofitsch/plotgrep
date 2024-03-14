@@ -9,13 +9,6 @@ int db_by_dist(const void * a, const void * b) {
 
 }
 
-void db_destroy_entry(db_Entry *e){
-
-  free(e->hex);
-  free(e->name);
-
-}
-
 void db_write_entry(FILE *f, db_Entry *e){
   
   fputs(e->hex, f);
@@ -26,16 +19,35 @@ void db_write_entry(FILE *f, db_Entry *e){
 
 }
 
-bool db_read_entry(FILE *f, db_Entry *e, int hex_length, char *buff){
-
-  if(fgets(buff, sizeof(buff), f) == NULL)
+bool db_read_entry(FILE *f, db_Entry *e, int hex_length){
+  
+  char line[hex_length + MAX_NAME_LENGTH]; //TODO put outside of function/loop
+  
+  if(fgets(line, sizeof(line), f) == NULL)
     return false;
 
-  buff[hex_length] = '\0';
+  line[hex_length] = '\0';
 
-  strcpy(e->hex, buff);
-  strcpy(e->name, buff + hex_length + 1);
+  char *hex = line;
+  char *name = line + hex_length + 1;
+
+  name[strlen(name) - 1] = '\0';
+
+  e->hex = (char *) calloc((strlen(hex)), sizeof(char));
+  e->name = (char *) calloc((strlen(name)), sizeof(char));
+
+  strcpy(e->hex, hex);
+  strcpy(e->name, name);
+
+  printf("%s %s\n", e->hex, e->name);
 
   return true;
+
+}
+
+void db_destroy_entry(db_Entry *e){
+
+  free(e->hex);
+  free(e->name);
 
 }

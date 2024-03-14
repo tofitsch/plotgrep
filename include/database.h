@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define MAX_NAME_LENGTH 100
+
 typedef struct {
 
   int dist;
@@ -18,7 +20,7 @@ typedef struct {
 int db_by_dist(const void*, const void*t);
 
 void db_write_entry(FILE*, db_Entry*);
-bool db_read_entry(FILE*, db_Entry *, int, char*);
+bool db_read_entry(FILE*, db_Entry *, int);
 
 void db_destroy_entry(db_Entry*);
 

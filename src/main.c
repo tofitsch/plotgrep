@@ -172,8 +172,22 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
 
 }
 
-void add_plots_from_csv(char *file_name) {
-  //TODO
+void add_plots_from_csv(char *file_name, db_Entry db[], int *n_db) {
+
+  FILE * in_file = fopen(file_name, "r");
+
+  int hex_length = DCT_DIMENSION * DCT_DIMENSION / 4;
+
+  while(db_read_entry(in_file, &db[*n_db], hex_length)) {
+
+    printf("%s", db[*n_db].hex);
+
+    (*n_db)++;
+
+  }
+
+  fclose(in_file);
+
 }
 
 int main(int argc, char **argv) {
@@ -194,7 +208,7 @@ int main(int argc, char **argv) {
   free(hex);
 
   if (argc < 2) {
-    fprintf(stderr, "usage: plotgrep <input.pdf>\n");
+    fprintf(stderr, "usage: ./plotgrep input.pdf input.csv -o output.csv\n");
     exit(EXIT_FAILURE);
   }
 
@@ -212,19 +226,21 @@ int main(int argc, char **argv) {
     char * file_name = argv[d];
     char * file_extension = file_name + strlen(file_name) - 4;
 
-    printf("%s %s\n", file_name, file_extension);
-
     if(strcmp(file_extension, ".pdf") == 0)
       add_plots_from_pdf(file_name, db, &n_db, PDF_ZOOM);
 
     if(strcmp(file_extension, ".csv") == 0){
       
-      printf("will write to %s\n", file_name);
       
-      if(is_output)
+      if(is_output) {
+
+        printf("will write to %s\n", file_name);
+
         out_file = fopen(file_name, "w");
+
+      }
       else
-        add_plots_from_csv(file_name);
+        add_plots_from_csv(file_name, db, &n_db);
 
     }
 
