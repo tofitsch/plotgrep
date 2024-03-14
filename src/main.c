@@ -14,12 +14,12 @@
 #include "bitmap.h"
 #include "database.h"
 
-#define DEBUG false
+#define DEBUG true
 #define PDF_ZOOM 2
 #define THRESHOLD 200
 #define TMP_FILE "tmp.png"
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
-#define MAX_DB_ENTRIES 128
+#define MAX_DB_ENTRIES 65536
 
 bm_BitMap* get_plot_from_screen_grab() {
   
@@ -194,8 +194,8 @@ int main(int argc, char **argv) {
   
   FILE * out_file = NULL;
   
+  db_Entry *db = (db_Entry*) malloc(MAX_DB_ENTRIES * sizeof(db_Entry));
   int n_db = 0;
-  db_Entry db[MAX_DB_ENTRIES];
   
   bm_BitMap *plot_screen_grab = get_plot_from_screen_grab();
 
@@ -272,6 +272,8 @@ int main(int argc, char **argv) {
 
   for(int i = 0; i < n_db ; ++i)
     db_destroy_entry(&db[i]);
+
+  free(db);
 
   if(out_file != NULL)
     fclose(out_file);
