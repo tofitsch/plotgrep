@@ -172,7 +172,13 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
 
 }
 
+void add_plots_from_csv(char *file_name) {
+  //TODO
+}
+
 int main(int argc, char **argv) {
+  
+  FILE * out_file = NULL;
   
   int n_db = 0;
   db_Entry db[MAX_DB_ENTRIES];
@@ -194,6 +200,15 @@ int main(int argc, char **argv) {
 
   for(int d = 1; d < argc; ++d){
     
+    bool is_output = false;
+
+    if(strcmp(argv[d], "-o") == 0){
+
+      is_output = true;
+      d++;
+
+    }
+    
     char * file_name = argv[d];
     char * file_extension = file_name + strlen(file_name) - 4;
 
@@ -202,7 +217,22 @@ int main(int argc, char **argv) {
     if(strcmp(file_extension, ".pdf") == 0)
       add_plots_from_pdf(file_name, db, &n_db, PDF_ZOOM);
 
+    if(strcmp(file_extension, ".csv") == 0){
+      
+      printf("will write to %s\n", file_name);
+      
+      if(is_output)
+        out_file = fopen(file_name, "w");
+      else
+        add_plots_from_csv(file_name);
+
+    }
+
   }
+
+  if(out_file != NULL)
+    for(int i = 0; i < n_db ; ++i)
+      db_write_entry(out_file, &db[i]);
 
   for(int i = 0; i < n_db ; ++i) {
     
@@ -226,6 +256,9 @@ int main(int argc, char **argv) {
 
   for(int i = 0; i < n_db ; ++i)
     db_destroy_entry(&db[i]);
+
+  if(out_file != NULL)
+    fclose(out_file);
 
   return EXIT_SUCCESS;
 
