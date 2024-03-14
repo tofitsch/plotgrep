@@ -8,3 +8,5 @@ sudo apt-get update && sudo apt-get install google-cloud-cli
 mkdir axv
 gsutil -m cp -r gs://arxiv-dataset/arxiv/arxiv/pdf/2402/ ./axv
 ```
+
+Note: remove -ggdb3 from Makefile once debugging done

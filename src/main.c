@@ -123,7 +123,7 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
 
     char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
 
-    sprintf(page_name, "%s page_%03d", file_name, p + 1);
+    sprintf(page_name, "%s_page_%03d", file_name, p + 1);
 
     if(DEBUG)
       bm_print(bm, page_name);
@@ -134,7 +134,7 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
 
       char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
 
-      sprintf(plot_name, "%s page_%03d_plot_%03d", file_name, p + 1, i + 1);
+      sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
 
       bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], DCT_DIMENSION);
 

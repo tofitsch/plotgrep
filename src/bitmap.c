@@ -172,14 +172,15 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
   
   *n_plots = 0;
 
-  int **ones_right = (int **) malloc(bm->h * sizeof(int *));
+  int **ones_right = (int **) malloc(bm->h * sizeof(int *)); //TODO: Done re-allocate this for each bm?
   int **ones_down = (int **) malloc(bm->h * sizeof(int *));
 
-  for (int y = 0; y < bm->h; y++)
-    ones_right[y] = (int *) malloc(bm->w * sizeof(int));
+  for (int y = 0; y < bm->h; y++) {
 
-  for (int y = 0; y < bm->h; y++)
+    ones_right[y] = (int *) malloc(bm->w * sizeof(int));
     ones_down[y] = (int *) malloc(bm->w * sizeof(int));
+
+  }
 
   for (int y = bm->h - 1; y >= 0; --y) {
     
@@ -239,6 +240,16 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
 
     }
   }
+
+  for (int y = 0; y < bm->h; y++) {
+
+    free(ones_right[y]);
+    free(ones_down[y]);
+
+  }
+  
+  free(ones_right);
+  free(ones_down);
 
 }
 
