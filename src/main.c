@@ -92,8 +92,6 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
     exit(EXIT_FAILURE);
   }
 
-  printf("reading plots from %s\n", file_name);
-
   int n_pages;
 
   fz_try(ctx)
@@ -229,7 +227,7 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
 
-    printf("will write to %s\n", file_name);
+    printf("output file: %s\n", file_name);
 
     out_file = fopen(file_name, "w");
 
@@ -256,6 +254,11 @@ int main(int argc, char **argv) {
     char * file_name = argv[i_arg];
     char * file_extension = file_name + strlen(file_name) - 4;
 
+    if (out_file == NULL)
+      printf("input file %d of %d: %s\n", i_arg, argc - 1, file_name);
+    else
+      printf("input file %d of %d: %s\n", i_arg - 2, argc - 3, file_name);
+    
     if (access(file_name, F_OK) == -1) {
       fprintf(stderr, "input file '%s' does not exist\n", file_name);
       exit(EXIT_FAILURE);
