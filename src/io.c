@@ -95,6 +95,8 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
     int n_plots = 0;
 
+    time_pdf_mupdf_beg = clock();
+
     fz_try(ctx)
       pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
     fz_catch(ctx) {
@@ -103,6 +105,9 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
       fz_drop_context(ctx);
       exit(EXIT_FAILURE);
     }
+
+    time_pdf_mupdf_end = clock();
+    time_pdf_mupdf_sum += time_pdf_mupdf_end - time_pdf_mupdf_beg;
 
     bm_BitMap *bm = bm_from_pix(pix, threshold);
 
@@ -116,7 +121,12 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
     bm_print(bm, page_name);
     #endif
 
+    time_pdf_findplots_beg = clock();
     bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE);
+    time_pdf_findplots_end = clock();
+    time_pdf_findplots_sum += time_pdf_findplots_end - time_pdf_findplots_beg;
+
+    time_pdf_loopplots_beg = clock();
 
     for(int i = 0; i < n_plots; ++i){
 
@@ -124,7 +134,10 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
       sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
 
+      time_pdf_dct_beg = clock();
       bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], dct_dimension);
+      time_pdf_dct_end = clock();
+      time_pdf_dct_sum += time_pdf_dct_end - time_pdf_dct_beg;
 
       char *hex = bm_to_hex(dct); //XXX
       printf("%s %s\n", hex, plot_name);
@@ -143,6 +156,9 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
       bm_destroy(dct);
 
     }
+
+    time_pdf_loopplots_end = clock();
+    time_pdf_loopplots_sum += time_pdf_loopplots_end - time_pdf_loopplots_beg;
 
     bm_destroy(bm);
 
