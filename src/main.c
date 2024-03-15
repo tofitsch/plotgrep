@@ -20,6 +20,7 @@
 
 #define PDF_ZOOM 2
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
+#define THRESHOLD 200
 #define MAX_DB_ENTRIES 65536
 
 int main(int argc, char **argv) {
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
 
   if (out_file == NULL) {
   
-    dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION);
+    dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION, THRESHOLD);
 
     char *hex = bm_to_hex(dct_screen_grab);
 
@@ -93,7 +94,7 @@ int main(int argc, char **argv) {
     }
 
     if(strcmp(file_extension, ".pdf") == 0)
-      io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, PDF_ZOOM);
+      io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
 
     if(strcmp(file_extension, ".csv") == 0)
       io_add_plots_from_csv(file_name, db, &n_db, DCT_DIMENSION);
