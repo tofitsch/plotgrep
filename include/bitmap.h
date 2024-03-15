@@ -32,7 +32,7 @@ bm_BitMap* bm_from_bm(bm_BitMap*, int, int, int, int);
 bm_BitMap* bm_discrete_cosine_transform(bm_BitMap*, int);
 
 void bm_print(bm_BitMap*, char*);
-void bm_find_plots(bm_BitMap*, bm_BitMap* [], int*);
+void bm_find_plots(bm_BitMap*, bm_BitMap* [], int*, int);
 
 char* bm_to_hex(bm_BitMap*);
 bm_BitMap* bm_from_hex(char*, int, int);

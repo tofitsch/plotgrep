@@ -168,7 +168,7 @@ void bm_print(bm_BitMap *bm, char * prefix){
 
 }
 
-void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
+void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_max){
   
   *n_plots = 0;
 
@@ -234,12 +234,17 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots){
 
         plots[(*n_plots)++] = bm_from_bm(bm, x, y, w_max_area, h_max_area);
 
+        if( *n_plots == n_plots_max)
+          goto end;
+
       }
 
       next:;
 
     }
   }
+
+  end:;
 
   for (int y = 0; y < bm->h; y++) {
 
