@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <time.h> //XXX
+#include <time.h>
 #include <mupdf/fitz.h>
 
 #include "io.h"
@@ -20,24 +20,18 @@
 #include "database.h"
 
 #define PDF_ZOOM 2
-#define DCT_DIMENSION 8 //TODO: must be divisible by 4 (for hex encoding)
+#define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
 #define THRESHOLD 200
 #define MAX_DB_ENTRIES 65536
 
-double time_main_beg, time_pdf_beg, time_pdf_loopplots_beg, time_pdf_findplots_beg, time_pdf_mupdf_beg, time_pdf_dct_beg;
-double time_main_end, time_pdf_end, time_pdf_loopplots_end, time_pdf_findplots_end, time_pdf_mupdf_end, time_pdf_dct_end;
-double time_main_sum, time_pdf_sum, time_pdf_loopplots_sum, time_pdf_findplots_sum, time_pdf_mupdf_sum, time_pdf_dct_sum;
+bt_Time b;
+bt_Time *bt_time = &b;
 
 int main(int argc, char **argv) {
   
-  time_main_sum = 0.;
-  time_pdf_sum = 0.;
-  time_pdf_loopplots_sum = 0.;
-  time_pdf_findplots_sum = 0.;
-  time_pdf_mupdf_sum = 0.;
-  time_pdf_dct_sum = 0.;
+  bt_init(bt_time);
 
-  time_main_beg = clock();
+  clock_t time_main_beg = clock();
   
   int i_arg = 1;
 
@@ -108,10 +102,13 @@ int main(int argc, char **argv) {
     }
 
     if(strcmp(file_extension, ".pdf") == 0) {
-      time_pdf_beg = clock();
+
+      clock_t time_pdf_beg = clock();
+
       io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
-      time_pdf_end = clock();
-      time_pdf_sum += time_pdf_end - time_pdf_beg;
+
+      bt_time->pdf += clock() - time_pdf_beg;
+
     }
     else if(strcmp(file_extension, ".csv") == 0) {
       io_add_plots_from_csv(file_name, db, &n_db, DCT_DIMENSION);
@@ -156,15 +153,9 @@ int main(int argc, char **argv) {
   if(out_file != NULL)
     fclose(out_file);
 
-  time_main_end = clock(); 
-  time_main_sum = time_main_end - time_main_beg;
+  bt_time->main += clock() - time_main_beg;
 
-  printf("time_main: %lf s\n", time_main_sum / CLOCKS_PER_SEC);
-  printf("time_pdf: %lf %%\n", time_pdf_sum / time_pdf_sum * 100.);
-  printf("time_pdf_mupdf: %lf %%\n", time_pdf_mupdf_sum / time_main_sum * 100.);
-  printf("time_pdf_findplots: %lf %%\n", time_pdf_findplots_sum / time_main_sum * 100.);
-  printf("time_pdf_loopplots: %lf %%\n", time_pdf_loopplots_sum / time_main_sum * 100.);
-  printf("time_pdf_dct: %lf %%\n", time_pdf_dct_sum / time_main_sum * 100.);
+  bt_print(bt_time);
 
   return EXIT_SUCCESS;
 
