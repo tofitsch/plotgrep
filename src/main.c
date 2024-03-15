@@ -9,12 +9,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <mupdf/fitz.h>
 
 #include "bitmap.h"
 #include "database.h"
 
-#define DEBUG true
+#define DEBUG false
 #define PDF_ZOOM 2
 #define THRESHOLD 200
 #define TMP_FILE "tmp.png"
@@ -141,7 +142,7 @@ void add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int pdf_zoom)
       bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], DCT_DIMENSION);
 
       char *hex = bm_to_hex(dct); //XXX
-      printf("%s\n", hex);
+      printf("%s %s\n", hex, plot_name);
 
       if(DEBUG)
         bm_print(plots[i], plot_name);
@@ -182,7 +183,7 @@ void add_plots_from_csv(char *file_name, db_Entry db[], int *n_db) {
 
   while(db_read_entry(in_file, &db[*n_db], hex_length)) {
 
-    printf("%s", db[*n_db].hex);
+    printf("%s %s\n", db[*n_db].hex, db[*n_db].name);
 
     (*n_db)++;
 
@@ -194,57 +195,77 @@ void add_plots_from_csv(char *file_name, db_Entry db[], int *n_db) {
 
 int main(int argc, char **argv) {
   
+  int i_arg = 1;
+
   FILE * out_file = NULL;
+
+  bm_BitMap *plot_screen_grab = NULL;
+  bm_BitMap *dct_screen_grab = NULL;
   
   db_Entry *db = (db_Entry*) malloc(MAX_DB_ENTRIES * sizeof(db_Entry));
   int n_db = 0;
-  
-  bm_BitMap *plot_screen_grab = get_plot_from_screen_grab();
-
-  bm_BitMap *dct_screen_grab = bm_discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
-
-  char *hex = bm_to_hex(dct_screen_grab);
-
-  printf("screen grab: %s\n", hex);
-
-  free(hex);
 
   if (argc < 2) {
-    fprintf(stderr, "usage: ./plotgrep input.pdf input.csv -o output.csv\n");
+    fprintf(stderr, "example usage:\n\n");
+    fprintf(stderr, " save from input PDFs to output CSV:\n");
+    fprintf(stderr, "  ./plotgrep -o output.csv input_file.pdf input_dir/*.pdf\n\n");
+    fprintf(stderr, " search screengrab in input PDFs and/or CSVs:\n");
+    fprintf(stderr, "  ./plotgrep input_file.pdf input_file.csv input_dir/*.pdf input_dir/*.csv\n\n"); 
     exit(EXIT_FAILURE);
   }
 
-  for(int d = 1; d < argc; ++d){
-    
-    bool is_output = false;
+  if(strcmp(argv[1], "-o") == 0) {
 
-    if(strcmp(argv[d], "-o") == 0){
-
-      is_output = true;
-      d++;
-
+    if(argc < 3) {
+      fprintf(stderr, "output option '-o' given but no output file specified\n");
+      exit(EXIT_FAILURE);
     }
-    
-    char * file_name = argv[d];
+
+    char * file_name = argv[2];
     char * file_extension = file_name + strlen(file_name) - 4;
+
+    if(strcmp(file_extension, ".csv") != 0) {
+      fprintf(stderr, "output file '%s' has invalid extension '%s'. Must be '.csv'\n", file_name, file_extension);
+      exit(EXIT_FAILURE);
+    }
+
+    printf("will write to %s\n", file_name);
+
+    out_file = fopen(file_name, "w");
+
+    i_arg += 2;
+
+  }
+
+  if (out_file == NULL) {
+  
+    plot_screen_grab = get_plot_from_screen_grab();
+
+    dct_screen_grab = bm_discrete_cosine_transform(plot_screen_grab, DCT_DIMENSION);
+
+    char *hex = bm_to_hex(dct_screen_grab);
+
+    printf("screen grab: %s\n", hex);
+
+    free(hex);
+
+  }
+
+  for(; i_arg < argc; ++i_arg){
+    
+    char * file_name = argv[i_arg];
+    char * file_extension = file_name + strlen(file_name) - 4;
+
+    if (access(file_name, F_OK) == -1) {
+      fprintf(stderr, "input file '%s' does not exist\n", file_name);
+      exit(EXIT_FAILURE);
+    }
 
     if(strcmp(file_extension, ".pdf") == 0)
       add_plots_from_pdf(file_name, db, &n_db, PDF_ZOOM);
 
-    if(strcmp(file_extension, ".csv") == 0){
-      
-      
-      if(is_output) {
-
-        printf("will write to %s\n", file_name);
-
-        out_file = fopen(file_name, "w");
-
-      }
-      else
-        add_plots_from_csv(file_name, db, &n_db);
-
-    }
+    if(strcmp(file_extension, ".csv") == 0)
+      add_plots_from_csv(file_name, db, &n_db);
 
   }
 
@@ -252,25 +273,27 @@ int main(int argc, char **argv) {
     for(int i = 0; i < n_db ; ++i)
       db_write_entry(out_file, &db[i]);
 
-  for(int i = 0; i < n_db ; ++i) {
-    
-    bm_BitMap *dct_plot = bm_from_hex(db[i].hex, DCT_DIMENSION, DCT_DIMENSION);
+  if (out_file == NULL) {
 
-    db[i].dist = bm_hamming_distance(dct_plot, dct_screen_grab);
+    for(int i = 0; i < n_db ; ++i) {
+      
+      bm_BitMap *dct_plot = bm_from_hex(db[i].hex, DCT_DIMENSION, DCT_DIMENSION);
 
-    printf("%d\n", db[i].dist);
+      db[i].dist = bm_hamming_distance(dct_plot, dct_screen_grab);
 
-    bm_destroy(dct_plot);
+      bm_destroy(dct_plot);
+
+    }
+      
+    bm_destroy(plot_screen_grab);
+    bm_destroy(dct_screen_grab);
+
+    qsort(db, n_db, sizeof(db_Entry), db_by_dist);
+
+    for(int i = 0; i < n_db ; ++i)
+      printf("%04d %s %s\n", db[i].dist, db[i].hex, db[i].name);
 
   }
-    
-  bm_destroy(plot_screen_grab);
-  bm_destroy(dct_screen_grab);
-
-  qsort(db, n_db, sizeof(db_Entry), db_by_dist);
-
-  for(int i = 0; i < n_db ; ++i)
-    printf("%04d %s %s\n", db[i].dist, db[i].hex, db[i].name);
 
   for(int i = 0; i < n_db ; ++i)
     db_destroy_entry(&db[i]);
