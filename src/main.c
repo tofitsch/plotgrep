@@ -93,11 +93,16 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
 
-    if(strcmp(file_extension, ".pdf") == 0)
+    if(strcmp(file_extension, ".pdf") == 0) {
       io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
-
-    if(strcmp(file_extension, ".csv") == 0)
+    }
+    else if(strcmp(file_extension, ".csv") == 0) {
       io_add_plots_from_csv(file_name, db, &n_db, DCT_DIMENSION);
+    }
+    else {
+      fprintf(stderr, "invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
+      exit(EXIT_FAILURE);
+    }
 
   }
 
