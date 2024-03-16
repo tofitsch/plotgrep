@@ -94,8 +94,8 @@ int main(int argc, char **argv) {
       printf("input file %d of %d: %s\n", i_arg - 2, argc - 3, file_name);
     
     if (access(file_name, F_OK) == -1) {
-      fprintf(stderr, "input file '%s' does not exist\n", file_name);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
+      continue;
     }
 
     if(strcmp(file_extension, ".pdf") == 0) {
@@ -111,8 +111,8 @@ int main(int argc, char **argv) {
       io_add_plots_from_csv(file_name, db, &n_db, DCT_DIMENSION);
     }
     else {
-      fprintf(stderr, "invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
+      continue;
     }
 
   }

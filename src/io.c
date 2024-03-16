@@ -56,26 +56,26 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
   ctx = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
   if (!ctx) {
-    fprintf(stderr, "cannot create mupdf context\n");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "WARNING: cannot create mupdf context.\nskipping %s\n", file_name);
+    return;
   }
 
   /* Register the default file types to handle. */
   fz_try(ctx)
     fz_register_document_handlers(ctx);
   fz_catch(ctx) {
-    fprintf(stderr, "cannot register document handlers: %s\n", fz_caught_message(ctx));
+    fprintf(stderr, "WARNING: cannot register document handlers: %s\nskipping %s\n", fz_caught_message(ctx), file_name);
     fz_drop_context(ctx);
-    exit(EXIT_FAILURE);
+    return;
   }
   
   /* Open the document. */
   fz_try(ctx)
     doc = fz_open_document(ctx, file_name);
   fz_catch(ctx) {
-    fprintf(stderr, "cannot open document: %s\n", fz_caught_message(ctx));
+    fprintf(stderr, "WARNING: cannot open document: %s\nskipping %s\n", fz_caught_message(ctx), file_name);
     fz_drop_context(ctx);
-    exit(EXIT_FAILURE);
+    return;
   }
 
   int n_pages;
@@ -83,10 +83,10 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
   fz_try(ctx)
     n_pages = fz_count_pages(ctx, doc);
   fz_catch(ctx) {
-    fprintf(stderr, "cannot count number of pages: %s\n", fz_caught_message(ctx));
+    fprintf(stderr, "WARNING: cannot count number of pages: %s\nskipping %s\n", fz_caught_message(ctx), file_name);
     fz_drop_document(ctx, doc);
     fz_drop_context(ctx);
-    exit(EXIT_FAILURE);
+    return;
   }
 
   mtx = fz_scale(pdf_zoom, pdf_zoom);
@@ -100,10 +100,10 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
     fz_try(ctx)
       pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
     fz_catch(ctx) {
-      fprintf(stderr, "cannot render page: %s\n", fz_caught_message(ctx));
+      fprintf(stderr, "cannot render page: %s\nskipping page %d in %s\n", fz_caught_message(ctx), p + 1, file_name);
       fz_drop_document(ctx, doc);
       fz_drop_context(ctx);
-      exit(EXIT_FAILURE);
+      continue;
     }
 
     bm_BitMap *bm = bm_from_pix(pix, threshold);
