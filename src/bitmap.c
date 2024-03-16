@@ -261,7 +261,8 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
 bm_BitMap* bm_discrete_cosine_transform(bm_BitMap* bm, int d){
   //2D DCT as defined in: https://doi.org/10.1117/12.853142
 
-  int N = bm->w < bm->h ? bm->w : bm->h;
+  int N_x = bm->w;
+  int N_y = bm->h;
 
   bm_BitMap *dct = bm_create(d, d);
 
@@ -270,26 +271,9 @@ bm_BitMap* bm_discrete_cosine_transform(bm_BitMap* bm, int d){
 
       float F = 0.;
 
-      for (int x = 0; x < N ; ++x) {
-        for (int y = 0; y < N ; ++y) {
-          
-          float f = (x < bm->w && y < bm->h) ? bm->data[y][x] : 0.;
-
-          F += f * cos((2. * x + 1.) * u * M_PI / (2. * N)) * cos((2. * y + 1.) * v * M_PI / (2. * N));
-
-        }
-      }
-      
-      float alpha_u = 1. / sqrt((float) N);
-      float alpha_v = 1. / sqrt((float) N);
-
-      if(u > 0)
-        alpha_u *= sqrt(2);
-
-      if(v > 0)
-        alpha_v *= sqrt(2);
-
-      F *= alpha_u * alpha_v;
+      for (int x = 0; x < N_x ; ++x)
+        for (int y = 0; y < N_y ; ++y)
+          F += bm->data[y][x] * cos((2. * x + 1.) * u * M_PI / (2. * N_x)) * cos((2. * y + 1.) * v * M_PI / (2. * N_y));
 
       dct->data[v][u] = F > 0. ? 0 : 1;
 
