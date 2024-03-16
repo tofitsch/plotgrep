@@ -14,8 +14,8 @@ extern bt_Time *bt_time;
 
 bm_BitMap* io_get_plot_from_screen_grab(int, int);
 
-void io_add_plots_from_pdf(char*, db_EntryPlot [], int*, db_EntryPage [], int*, int, int, int);
+void io_add_plots_from_pdf(char*, FILE*, db_EntryPlot [], int*, db_EntryPage [], int*, int, int, int);
 
-void io_add_plots_from_csv(char*, db_EntryPlot [], int*, int);
+void io_add_plots_from_csv(char*, FILE*, db_EntryPlot [], int*, int);
 
 #endif

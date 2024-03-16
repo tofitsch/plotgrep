@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   
   int i_arg = 1;
 
-  FILE * out_file = NULL;
+  FILE *out_file = NULL;
 
   bm_BitMap *dct_screen_grab = NULL;
   
@@ -106,13 +106,13 @@ int main(int argc, char **argv) {
 
       clock_t time_pdf_beg = clock();
 
-      io_add_plots_from_pdf(file_name, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
+      io_add_plots_from_pdf(file_name, out_file, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
 
       bt_time->pdf += (double) (clock() - time_pdf_beg);
 
     }
     else if(strcmp(file_extension, ".csv") == 0) {
-      io_add_plots_from_csv(file_name, db_plots, &n_db_plots, DCT_DIMENSION);
+      io_add_plots_from_csv(file_name, out_file, db_plots, &n_db_plots, DCT_DIMENSION);
     }
     else {
       fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
@@ -120,10 +120,6 @@ int main(int argc, char **argv) {
     }
 
   }
-
-  if(out_file != NULL)
-    for(int i = 0; i < n_db_plots ; ++i)
-      db_write_plot(out_file, &db_plots[i]);
 
   if (out_file == NULL) {
 
@@ -162,7 +158,7 @@ int main(int argc, char **argv) {
 
   for(; i < n_db_pages ; ++i)
     if(db_pages[i].time > min_time_for_print)
-      printf("%lf s to load  %s page %d\n", db_pages[i].time, db_pages[i].file_name, db_pages[i].page);
+      printf("%lf s to load %s page %d\n", db_pages[i].time, db_pages[i].file_name, db_pages[i].page);
 
   for(int i = 0; i < n_db_plots ; ++i)
     db_destroy_plot(&db_plots[i]);
