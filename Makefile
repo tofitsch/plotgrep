@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -ggdb3 -I./include
+CFLAGS = -Wall -Wextra -ggdb3 -fopenmp -I./include
 LIBS = -lmupdf -lmupdf-third -lfreetype -lharfbuzz -ljpeg -lpng -lz -lopenjp2 -ljbig2dec -lm
 LDFLAGS = -L/usr/lib/x86_64-linux-gnu
 SRC = $(wildcard src/*.c)

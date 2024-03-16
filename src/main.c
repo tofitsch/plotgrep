@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 
       io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
 
-      bt_time->pdf += clock() - time_pdf_beg;
+      bt_time->pdf += (double) (clock() - time_pdf_beg);
 
     }
     else if(strcmp(file_extension, ".csv") == 0) {
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
   if(out_file != NULL)
     fclose(out_file);
 
-  bt_time->main += clock() - time_main_beg;
+  bt_time->main += (double) (clock() - time_main_beg);
 
   bt_print(bt_time);
 

@@ -266,7 +266,9 @@ bm_BitMap* bm_discrete_cosine_transform(bm_BitMap* bm, int d){
 
   bm_BitMap *dct = bm_create(d, d);
 
+  #pragma omp parallel for
   for (int u = 0; u < d ; ++u) {
+    #pragma omp parallel for
     for (int v = 0; v < d; ++v) {
 
       float F = 0.;

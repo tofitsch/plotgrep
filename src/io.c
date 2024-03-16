@@ -118,13 +118,13 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
     bm_print(bm, page_name);
     #endif
 
-    bt_time->pdf_mupdf += clock() - time_pdf_mupdf_beg;
+    bt_time->pdf_mupdf += (double) (clock() - time_pdf_mupdf_beg);
 
     clock_t time_pdf_findplots_beg = clock();
 
     bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE);
 
-    bt_time->pdf_findplots += clock() - time_pdf_findplots_beg;
+    bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
     clock_t time_pdf_loopplots_beg = clock();
 
@@ -138,7 +138,7 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
       bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], dct_dimension);
 
-      bt_time->pdf_dct += clock() - time_pdf_dct_beg;
+      bt_time->pdf_dct += (double) (clock() - time_pdf_dct_beg);
 
       char *hex = bm_to_hex(dct); //XXX
       printf("%s %s\n", hex, plot_name);
@@ -158,7 +158,7 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
     }
 
-    bt_time->pdf_loopplots += clock() - time_pdf_loopplots_beg;
+    bt_time->pdf_loopplots += (double) (clock() - time_pdf_loopplots_beg);
 
     bm_destroy(bm);
 
