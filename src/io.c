@@ -47,7 +47,7 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
 
 }
 
-void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_dimension, int threshold, int pdf_zoom) {
+void io_add_plots_from_pdf(char *file_name, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int threshold, int pdf_zoom) {
 
   fz_context *ctx;
   fz_document *doc;
@@ -93,6 +93,14 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
   for (int p = 0; p < n_pages; ++p) {
 
+    db_pages[*n_db_pages].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+
+    strcpy(db_pages[*n_db_pages].file_name, file_name);
+    db_pages[*n_db_pages].page = p + 1;
+    db_pages[*n_db_pages].time = -1.;
+
+    (*n_db_pages)++;
+
     int n_plots = 0;
 
     clock_t time_pdf_mupdf_beg = clock();
@@ -126,6 +134,8 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
     bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
+    db_pages[*n_db_pages - 1].time = (double) (clock() - time_pdf_mupdf_beg) / (double) CLOCKS_PER_SEC;
+
     clock_t time_pdf_loopplots_beg = clock();
 
     for(int i = 0; i < n_plots; ++i){
@@ -147,12 +157,12 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
       bm_print(plots[i], plot_name);
       #endif
 
-      db[*n_db].hex = hex;
-      db[*n_db].name = plot_name;
+      db_plots[*n_db_plots].hex = hex;
+      db_plots[*n_db_plots].name = plot_name;
 
-      db[*n_db].dist = -1;
+      db_plots[*n_db_plots].dist = -1;
 
-      (*n_db)++;
+      (*n_db_plots)++;
        
       bm_destroy(dct);
 
@@ -177,13 +187,13 @@ void io_add_plots_from_pdf(char *file_name, db_Entry db[], int *n_db, int dct_di
 
 }
 
-void io_add_plots_from_csv(char *file_name, db_Entry db[], int *n_db, int dct_dimension) {
+void io_add_plots_from_csv(char *file_name, db_EntryPlot db[], int *n_db, int dct_dimension) {
 
   FILE * in_file = fopen(file_name, "r");
 
   int hex_length = dct_dimension * dct_dimension / 4;
 
-  while(db_read_entry(in_file, &db[*n_db], hex_length)) {
+  while(db_read_plot(in_file, &db[*n_db], hex_length)) {
 
     printf("%s %s\n", db[*n_db].hex, db[*n_db].name);
 

@@ -20,6 +20,7 @@
 #define PDF_ZOOM 2
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
 #define MAX_DB_ENTRIES 65536
+#define MAX_DB_PAGE_ENTRIES 65536
 
 bt_Time b;
 bt_Time *bt_time = &b;
@@ -36,8 +37,11 @@ int main(int argc, char **argv) {
 
   bm_BitMap *dct_screen_grab = NULL;
   
-  db_Entry *db = (db_Entry*) malloc(MAX_DB_ENTRIES * sizeof(db_Entry));
-  int n_db = 0;
+  db_EntryPlot *db_plots = (db_EntryPlot*) malloc(MAX_DB_ENTRIES * sizeof(db_EntryPlot));
+  int n_db_plots = 0;
+
+  db_EntryPage *db_pages = (db_EntryPage*) malloc(MAX_DB_PAGE_ENTRIES * sizeof(db_EntryPage));
+  int n_db_pages = 0;
 
   if (argc < 2) {
     fprintf(stderr, "example usage:\n\n");
@@ -102,13 +106,13 @@ int main(int argc, char **argv) {
 
       clock_t time_pdf_beg = clock();
 
-      io_add_plots_from_pdf(file_name, db, &n_db, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
+      io_add_plots_from_pdf(file_name, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
 
       bt_time->pdf += (double) (clock() - time_pdf_beg);
 
     }
     else if(strcmp(file_extension, ".csv") == 0) {
-      io_add_plots_from_csv(file_name, db, &n_db, DCT_DIMENSION);
+      io_add_plots_from_csv(file_name, db_plots, &n_db_plots, DCT_DIMENSION);
     }
     else {
       fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
@@ -118,16 +122,16 @@ int main(int argc, char **argv) {
   }
 
   if(out_file != NULL)
-    for(int i = 0; i < n_db ; ++i)
-      db_write_entry(out_file, &db[i]);
+    for(int i = 0; i < n_db_plots ; ++i)
+      db_write_plot(out_file, &db_plots[i]);
 
   if (out_file == NULL) {
 
-    for(int i = 0; i < n_db ; ++i) {
+    for(int i = 0; i < n_db_plots ; ++i) {
       
-      bm_BitMap *dct_plot = bm_from_hex(db[i].hex, DCT_DIMENSION, DCT_DIMENSION);
+      bm_BitMap *dct_plot = bm_from_hex(db_plots[i].hex, DCT_DIMENSION, DCT_DIMENSION);
 
-      db[i].dist = bm_hamming_distance(dct_plot, dct_screen_grab);
+      db_plots[i].dist = bm_hamming_distance(dct_plot, dct_screen_grab);
 
       bm_destroy(dct_plot);
 
@@ -135,17 +139,40 @@ int main(int argc, char **argv) {
       
     bm_destroy(dct_screen_grab);
 
-    qsort(db, n_db, sizeof(db_Entry), db_by_dist);
+    qsort(db_plots, n_db_plots, sizeof(db_EntryPlot), db_by_min_dist);
 
-    for(int i = 0; i < n_db ; ++i)
-      printf("%04d %s %s\n", db[i].dist, db[i].hex, db[i].name);
+    for(int i = 0; i < n_db_plots ; ++i)
+      printf("%04d %s %s\n", db_plots[i].dist, db_plots[i].hex, db_plots[i].name);
 
   }
 
-  for(int i = 0; i < n_db ; ++i)
-    db_destroy_entry(&db[i]);
+  qsort(db_pages, n_db_pages, sizeof(db_EntryPage), db_by_max_time);
 
-  free(db);
+  double min_time_for_print = 1.;
+
+  int i = 0;
+
+  for(; i < n_db_pages ; ++i)
+    if(db_pages[i].time > min_time_for_print)
+      break;
+
+  printf("%d pages took longer than %lf s to load\n", n_db_pages - i, min_time_for_print);
+
+  i--;
+
+  for(; i < n_db_pages ; ++i)
+    if(db_pages[i].time > min_time_for_print)
+      printf("%lf s to load  %s page %d\n", db_pages[i].time, db_pages[i].file_name, db_pages[i].page);
+
+  for(int i = 0; i < n_db_plots ; ++i)
+    db_destroy_plot(&db_plots[i]);
+
+  free(db_plots);
+
+  for(int i = 0; i < n_db_pages ; ++i)
+    db_destroy_page(&db_pages[i]);
+
+  free(db_pages);
 
   if(out_file != NULL)
     fclose(out_file);

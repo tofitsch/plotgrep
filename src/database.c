@@ -1,15 +1,24 @@
 #include "database.h"
 
-int db_by_dist(const void * a, const void * b) {
+int db_by_min_dist(const void * a, const void * b) {
 
-  const db_Entry * A = (const db_Entry *) a;
-  const db_Entry * B = (const db_Entry *) b;
+  const db_EntryPlot * A = (const db_EntryPlot *) a;
+  const db_EntryPlot * B = (const db_EntryPlot *) b;
 
   return A->dist < B->dist;
 
 }
 
-void db_write_entry(FILE *f, db_Entry *e){
+int db_by_max_time(const void * a, const void * b) {
+
+  const db_EntryPage * A = (const db_EntryPage *) a;
+  const db_EntryPage * B = (const db_EntryPage *) b;
+
+  return A->time > B->time;
+
+}
+
+void db_write_plot(FILE *f, db_EntryPlot *e){
   
   fputs(e->hex, f);
   fputs(",", f);
@@ -19,7 +28,7 @@ void db_write_entry(FILE *f, db_Entry *e){
 
 }
 
-bool db_read_entry(FILE *f, db_Entry *e, int hex_length){
+bool db_read_plot(FILE *f, db_EntryPlot *e, int hex_length){
   
   char line[hex_length + MAX_NAME_LENGTH]; //TODO put outside of function/loop
   
@@ -45,9 +54,15 @@ bool db_read_entry(FILE *f, db_Entry *e, int hex_length){
 
 }
 
-void db_destroy_entry(db_Entry *e){
+void db_destroy_plot(db_EntryPlot *e){
 
   free(e->hex);
   free(e->name);
+
+}
+
+void db_destroy_page(db_EntryPage *e){
+
+  free(e->file_name);
 
 }
