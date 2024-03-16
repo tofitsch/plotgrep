@@ -238,7 +238,7 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
 
         plots[(*n_plots)++] = bm_from_bm(bm, x, y, w_max_area, h_max_area);
 
-        printf("RECIP_PLOT_AREA_OF_TOTAL: %d\n", (bm->w * bm->h) / (w_max_area * h_max_area));
+//        printf("RECIP_PLOT_AREA_OF_TOTAL: %d\n", (bm->w * bm->h) / (w_max_area * h_max_area));
 
         if( *n_plots == n_plots_max)
           goto end;
