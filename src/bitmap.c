@@ -203,7 +203,7 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
   for (int x = 0; x < bm->w; ++x) {
     for (int y = 0; y < bm->h; ++y) {
       
-      if(ones_right[y][x] * ones_down[y][x] < MIN_PLOT_AREA)
+      if(ones_right[y][x] * ones_down[y][x] == 0 || (bm->h * bm->w) / (ones_right[y][x] * ones_down[y][x]) > MAX_RECIP_PLOT_AREA_OF_TOTAL)
         continue;
       
       int max_area = 0;
@@ -215,7 +215,7 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
           if(ones_down[y][x] < Y)
             continue;
 
-          if (ones_right[y + Y][x] >= X && X * Y > max_area && X * Y >= MIN_PLOT_AREA && X / Y < MAX_PLOT_ASPECT_RATIO && Y / X < MAX_PLOT_ASPECT_RATIO) {
+          if (ones_right[y + Y][x] >= X && X * Y > max_area && (bm->h * bm->w) / (X * Y) <= MAX_RECIP_PLOT_AREA_OF_TOTAL && X / Y < MAX_PLOT_ASPECT_RATIO && Y / X < MAX_PLOT_ASPECT_RATIO) {
 
             max_area = X * Y;
             
@@ -233,6 +233,8 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
             goto next;
 
         plots[(*n_plots)++] = bm_from_bm(bm, x, y, w_max_area, h_max_area);
+
+        printf("RECIP_PLOT_AREA_OF_TOTAL: %d\n", (bm->w * bm->h) / (w_max_area * h_max_area));
 
         if( *n_plots == n_plots_max)
           goto end;

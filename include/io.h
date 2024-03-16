@@ -5,7 +5,9 @@
 #include "database.h"
 #include "benchmark.h"
 
-#define THRESHOLD 200
+#define DEBUG
+
+#define THRESHOLD 250
 #define TMP_FILE "tmp.png"
 
 extern bt_Time *bt_time;

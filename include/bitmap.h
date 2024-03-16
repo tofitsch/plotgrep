@@ -10,9 +10,9 @@
 
 #include "misc.h"
 
-#define MIN_PLOT_AREA 1000
-#define MAX_PLOT_ASPECT_RATIO 5
-#define MAX_PLOTS_PER_PAGE 100
+#define MAX_RECIP_PLOT_AREA_OF_TOTAL 100
+#define MAX_PLOT_ASPECT_RATIO 3
+#define MAX_PLOTS_PER_PAGE 16
 #define PNG_HEADER_BYTES 8
 
 typedef struct {

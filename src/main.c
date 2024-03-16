@@ -6,8 +6,6 @@
 // gcc -o x extract_images.c /usr/lib/libmupdf.a /usr/lib/libmupdf-third.a -lmupdf -lm -lmupdf-third -lfreetype -lharfbuzz -ljpeg -lz -L/usr/lib/x86_64-linux-gnu -lopenjp2 -ljbig2dec
 // ./x test.pdf
 //
-#define DEBUG
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -21,7 +19,6 @@
 
 #define PDF_ZOOM 2
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
-#define THRESHOLD 200
 #define MAX_DB_ENTRIES 65536
 
 bt_Time b;
