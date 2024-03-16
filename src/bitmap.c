@@ -205,7 +205,11 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
       
       if(ones_right[y][x] * ones_down[y][x] == 0 || (bm->h * bm->w) / (ones_right[y][x] * ones_down[y][x]) > MAX_RECIP_PLOT_AREA_OF_TOTAL)
         continue;
-      
+
+     for (int i = 0; i < *n_plots; ++i)
+       if(is_in_rectangle(x, y, plots[i]->x, plots[i]->y, plots[i]->w, plots[i]->h))
+         goto next;
+
       int max_area = 0;
       int w_max_area, h_max_area;
       

@@ -20,6 +20,16 @@ void hex_to_bits(bool bits[4], char const *c) {
 
 }
 
+bool is_in_rectangle(int X, int Y, int x, int y, int w, int h) {
+ 
+
+  if(X >= x && X <= x + w && Y >= y && Y <= y + h)
+    return true;
+  
+  return false;
+
+}
+
 bool rectangles_overlap(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
 
   if (x1 >= x2 + w2 || x2 >= x1 + w1)
