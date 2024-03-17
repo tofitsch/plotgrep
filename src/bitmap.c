@@ -119,13 +119,13 @@ bm_BitMap* bm_crop_from_png(png_structp png_ptr, png_infop info_ptr, int offset_
 
 bm_BitMap* bm_crop_from_pdf(fz_pixmap *pix, int offset_x, int offset_y, int w, int h) {
   
-  unsigned long int sum = 0; 
+  int sum = 0; 
 
-  for (int y = 0; y < pix->h; ++y) {
+  for (int y = 0; y < h; ++y) {
 
-    unsigned char *p = &pix->samples[y * pix->stride];
+    unsigned char *p = &(pix->samples[(y + offset_y) * pix->stride]) + offset_x;
 
-    for (int x = 0; x < pix->w; ++x) {
+    for (int x = 0; x < w; ++x) {
 
       sum += *p;
 
@@ -135,7 +135,7 @@ bm_BitMap* bm_crop_from_pdf(fz_pixmap *pix, int offset_x, int offset_y, int w, i
 
   }
 
-  unsigned char threshold = sum / (w * h);
+  int threshold = sum / (w * h);
 
   bm_BitMap *new_bm = bm_create(w, h);
 
