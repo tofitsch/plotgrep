@@ -25,22 +25,22 @@ typedef struct {
 
 bm_BitMap* bm_create(int, int);
 
-
 bm_BitMap* bm_from_pdf(fz_pixmap*, int);
-bm_BitMap* bm_from_png(png_structp, png_infop, int);
+bm_BitMap* bm_from_png(png_bytep [], int, int, int);
+
+bm_BitMap* bm_from_hex(char*, int, int);
+char* bm_to_hex(bm_BitMap*);
 
 bm_BitMap* bm_crop_from_pdf(fz_pixmap*, int, int, int, int);
-bm_BitMap* bm_crop_from_png(png_structp, png_infop, int, int, int, int);
+bm_BitMap* bm_crop_from_png(png_bytep [], int, int, int, int);
+
+void bm_find_plots(bm_BitMap*, bm_BitMap* [], int*, int, fz_pixmap*, png_bytep []);
 
 bm_BitMap* bm_discrete_cosine_transform(bm_BitMap*, int);
 
-void bm_print(bm_BitMap*, char*);
-void bm_find_plots(bm_BitMap*, bm_BitMap* [], int*, int, fz_pixmap*, png_structp png_ptr, png_infop info_ptr);
-
-char* bm_to_hex(bm_BitMap*);
-bm_BitMap* bm_from_hex(char*, int, int);
-
 int bm_hamming_distance(bm_BitMap*, bm_BitMap*);
+
+void bm_print(bm_BitMap*, char*);
 
 void bm_destroy(bm_BitMap*);
 

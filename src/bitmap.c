@@ -41,26 +41,14 @@ bm_BitMap* bm_from_pdf(fz_pixmap *pix, int threshold) {
 
 }
 
-bm_BitMap* bm_from_png(png_structp png_ptr, png_infop info_ptr, int threshold) {
-
-  int w = png_get_image_width(png_ptr, info_ptr);
-  int h = png_get_image_height(png_ptr, info_ptr);
+bm_BitMap* bm_from_png(png_bytep png_bytes[], int w, int h, int threshold) {
 
   bm_BitMap *bm = bm_create(w, h);
 
-  png_bytep row_data = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
-
-  for (int y = 0; y < h; y++) {
-
-    png_read_row(png_ptr, row_data, NULL);
-
+  for (int y = 0; y < h; y++)
     for (int x = 0; x < w; x++)
-      bm->data[y][x] = row_data[x] > threshold ? 0 : 1;
+      bm->data[y][x] = png_bytes[y][x] > threshold ? 0 : 1;
 
-  }
-
-  free(row_data);
-  
   return bm;
 
 }
@@ -80,39 +68,22 @@ bm_BitMap* bm_from_bm(bm_BitMap *bm, int offset_x, int offset_y, int w, int h) {
 
 }
 
-bm_BitMap* bm_crop_from_png(png_structp png_ptr, png_infop info_ptr, int offset_x, int offset_y, int w, int h) {
+bm_BitMap* bm_crop_from_png(png_bytep png_bytes[], int offset_x, int offset_y, int w, int h) {
 
-  png_bytep row_data = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
+  int sum = 0; 
 
-  unsigned long int sum = 0; 
-
-  for (int y = 0; y < h; y++) {
-
-    png_read_row(png_ptr, row_data, NULL);
-
+  for (int y = 0; y < h; y++)
     for (int x = 0; x < w; x++)
-      sum += row_data[x];
+      sum += png_bytes[offset_y + y][offset_x + x];
 
-  }
-
-  unsigned char threshold = sum / (w * h);
+  int threshold = sum / (w * h);
 
   bm_BitMap *bm = bm_create(w, h);
 
-  for (int y = 0; y < offset_y; y++)
-    png_read_row(png_ptr, row_data, NULL);
-
-  for (int y = 0; y < h; y++) {
-
-    png_read_row(png_ptr, row_data, NULL);
-
+  for (int y = 0; y < h; y++)
     for (int x = 0; x < w; x++)
-      bm->data[y][x] = row_data[offset_x + x] > threshold ? 0 : 1;
+      bm->data[y][x] = png_bytes[offset_y + y][offset_x + x] > threshold ? 0 : 1;
 
-  }
-
-  free(row_data);
-  
   return bm;
 
 }
@@ -196,7 +167,7 @@ void bm_print(bm_BitMap *bm, char * prefix){
 
 }
 
-void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_max, fz_pixmap *pix, png_structp png_ptr, png_infop png_info_ptr){
+void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_max, fz_pixmap *pix, png_bytep png_bytes[]){
 
   *n_plots = 0;
 
@@ -266,8 +237,8 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
 
         if (pix != NULL)
           plots[(*n_plots)++] = bm_crop_from_pdf(pix, x, y, w_max_area, h_max_area);
-        else if (png_ptr != NULL && png_info_ptr != NULL)
-          plots[(*n_plots)++] = bm_crop_from_png(png_ptr, png_info_ptr, x, y, w_max_area, h_max_area);
+        else if (png_bytes != NULL)
+          plots[(*n_plots)++] = bm_crop_from_png(png_bytes, x, y, w_max_area, h_max_area);
 
         if( *n_plots == n_plots_max)
           goto end;

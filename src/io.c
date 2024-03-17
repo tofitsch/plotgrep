@@ -59,7 +59,20 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
     return NULL;
   }
 
-  bm_BitMap *bm = bm_from_png(png_ptr, info_ptr, threshold);
+  int w = png_get_image_width(png_ptr, info_ptr);
+  int h = png_get_image_height(png_ptr, info_ptr);
+
+  png_bytep *png_bytes = (png_bytep *) malloc(h * sizeof(png_bytep));
+
+  for (int y = 0; y < h; ++y) {
+
+    png_bytes[y] = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
+
+    png_read_row(png_ptr, png_bytes[y], NULL);
+
+  }
+
+  bm_BitMap *bm = bm_from_png(png_bytes, w, h, threshold);
 
   #ifdef DEBUG
   bm_print(bm, "pngtest");
@@ -68,7 +81,12 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
   int n_plots = 0;
   bm_BitMap *plots[1];
 
-  bm_find_plots(bm, plots, &n_plots, 1, NULL, png_ptr, info_ptr); //TODO
+  bm_find_plots(bm, plots, &n_plots, 1, NULL, png_bytes); //TODO
+
+  for (int y = 0; y < h; ++y)
+    free(png_bytes[y]);
+
+  free(png_bytes);
 
   remove(TMP_FILE); //TODO: remove system call
 
@@ -178,7 +196,7 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
     clock_t time_pdf_findplots_beg = clock();
 
-    bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL, NULL);
+    bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL);
 
     bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
