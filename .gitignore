@@ -5,6 +5,7 @@ axv
 *.pdf
 *.ppm
 *.csv
+*.log
 
 *.swp
 *.swo

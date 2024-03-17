@@ -108,10 +108,10 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
     fz_try(ctx)
       pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
     fz_catch(ctx) {
-      fprintf(stderr, "cannot render page: %s\nskipping page %d in %s\n", fz_caught_message(ctx), p + 1, file_name);
+      fprintf(stderr, "WARNING: cannot render page: %s\nskipping page %d in %s\nskipping %s\n", fz_caught_message(ctx), p + 1, file_name, file_name);
       fz_drop_document(ctx, doc);
       fz_drop_context(ctx);
-      continue;
+      return;
     }
 
     bm_BitMap *bm = bm_from_pix(pix, threshold);
