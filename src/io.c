@@ -15,18 +15,66 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
 
   free(full_command);
 
-  bm_BitMap *bm = bm_from_png(TMP_FILE, threshold);
+  FILE * in_file = fopen(TMP_FILE, "r");
+
+  unsigned char header[PNG_HEADER_BYTES];
+
+  fread(header, 1, PNG_HEADER_BYTES, in_file);
+
+  if (png_sig_cmp(header, 0, PNG_HEADER_BYTES)) {
+    fprintf(stderr, "Error: not a valid PNG file\n");
+    return NULL;
+  }
+
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+  if (!png_ptr) {
+    fprintf(stderr, "Error: png_create_read_struct failed\n");
+    return NULL;
+  }
+
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+
+  if (!info_ptr) {
+    png_destroy_read_struct(&png_ptr, NULL, NULL);
+    fprintf(stderr, "Error: png_create_info_struct failed\n");
+    return NULL;
+  }
+
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    fprintf(stderr, "Error: Error during PNG read\n");
+    return NULL;
+  }
+
+  png_init_io(png_ptr, in_file);
+  png_set_sig_bytes(png_ptr, PNG_HEADER_BYTES);
+  png_read_info(png_ptr, info_ptr);
+
+  png_byte color_type = png_get_color_type(png_ptr, info_ptr);
+  png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+
+  if (color_type != PNG_COLOR_TYPE_GRAY || bit_depth != 8) {
+    fprintf(stderr, "Error: Only 8-bit grayscale PNG images are supported\nUse `import -depth 8 -colorspace gray test.png`");
+    return NULL;
+  }
+
+  bm_BitMap *bm = bm_from_png(png_ptr, info_ptr, threshold);
 
   #ifdef DEBUG
   bm_print(bm, "pngtest");
   #endif
-
-  remove(TMP_FILE); //TODO: remove system call
   
   int n_plots = 0;
   bm_BitMap *plots[1];
 
-  bm_find_plots(bm, plots, &n_plots, 1);
+  bm_find_plots(bm, plots, &n_plots, 1, NULL, png_ptr, info_ptr); //TODO
+
+  remove(TMP_FILE); //TODO: remove system call
+
+  png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+
+  fclose(in_file);
 
   bm_destroy(bm);
 
@@ -114,7 +162,7 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
       return;
     }
 
-    bm_BitMap *bm = bm_from_pix(pix, threshold);
+    bm_BitMap *bm = bm_from_pdf(pix, threshold);
 
     bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
 
@@ -130,7 +178,7 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
     clock_t time_pdf_findplots_beg = clock();
 
-    bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE);
+    bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL, NULL);
 
     bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
