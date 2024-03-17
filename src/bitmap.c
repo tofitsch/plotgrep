@@ -19,7 +19,25 @@ bm_BitMap* bm_create(int w, int h) {
 
 }
 
-bm_BitMap* bm_from_pdf(fz_pixmap *pix, int threshold) {
+bm_BitMap* bm_from_pdf(fz_pixmap *pix) {
+
+  int sum = 0; 
+
+  for (int y = 0; y < pix->h; ++y) {
+
+    unsigned char *p = &pix->samples[y * pix->stride];
+
+    for (int x = 0; x < pix->w; ++x) {
+
+      sum += *p;
+
+      p++;
+
+    }
+
+  }
+
+  int threshold = sum / (pix->w * pix->h);
   
   bm_BitMap *bm = bm_create(pix->w, pix->h);
 
@@ -41,7 +59,15 @@ bm_BitMap* bm_from_pdf(fz_pixmap *pix, int threshold) {
 
 }
 
-bm_BitMap* bm_from_png(png_bytep png_bytes[], int w, int h, int threshold) {
+bm_BitMap* bm_from_png(png_bytep png_bytes[], int w, int h) {
+
+  int sum = 0; 
+
+  for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++)
+      sum += png_bytes[y][x];
+
+  int threshold = sum / (w * h);
 
   bm_BitMap *bm = bm_create(w, h);
 

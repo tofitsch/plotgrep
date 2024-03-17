@@ -1,6 +1,6 @@
 #include "io.h"
 
-bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
+bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
 
   printf("select plot to search\n");
 
@@ -72,7 +72,7 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
 
   }
 
-  bm_BitMap *bm = bm_from_png(png_bytes, w, h, threshold);
+  bm_BitMap *bm = bm_from_png(png_bytes, w, h);
 
   #ifdef DEBUG
   bm_print(bm, "pngtest");
@@ -113,7 +113,7 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension, int threshold) {
 
 }
 
-void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int threshold, int pdf_zoom) {
+void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int pdf_zoom) {
 
   fz_context *ctx;
   fz_document *doc;
@@ -180,7 +180,7 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
       return;
     }
 
-    bm_BitMap *bm = bm_from_pdf(pix, threshold);
+    bm_BitMap *bm = bm_from_pdf(pix);
 
     bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
 

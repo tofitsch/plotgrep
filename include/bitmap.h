@@ -25,8 +25,8 @@ typedef struct {
 
 bm_BitMap* bm_create(int, int);
 
-bm_BitMap* bm_from_pdf(fz_pixmap*, int);
-bm_BitMap* bm_from_png(png_bytep [], int, int, int);
+bm_BitMap* bm_from_pdf(fz_pixmap*);
+bm_BitMap* bm_from_png(png_bytep [], int, int);
 
 bm_BitMap* bm_from_hex(char*, int, int);
 char* bm_to_hex(bm_BitMap*);

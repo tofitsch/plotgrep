@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
   if (out_file == NULL) {
   
-    dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION, THRESHOLD);
+    dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION);
 
     char *hex = bm_to_hex(dct_screen_grab);
 
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
       clock_t time_pdf_beg = clock();
 
-      io_add_plots_from_pdf(file_name, out_file, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, THRESHOLD, PDF_ZOOM);
+      io_add_plots_from_pdf(file_name, out_file, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, PDF_ZOOM);
 
       bt_time->pdf += (double) (clock() - time_pdf_beg);
 
