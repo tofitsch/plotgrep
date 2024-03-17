@@ -4,4 +4,4 @@ valgrind --leak-check=full \
          --track-origins=yes \
          --verbose \
          --log-file=valgrind-out.txt \
-         ./plotgrep test.pdf
+         ./plotgrep -o test.csv test.pdf
