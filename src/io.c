@@ -79,9 +79,11 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
   #endif
   
   int n_plots = 0;
-  bm_BitMap *plots[1];
+  bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
 
-  bm_find_plots(bm, plots, &n_plots, 1, NULL, png_bytes); //TODO
+  bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, NULL, png_bytes); //TODO
+
+  qsort(plots, n_plots, sizeof(bm_BitMap), bm_by_area);
 
   for (int y = 0; y < h; ++y)
     free(png_bytes[y]);
@@ -106,6 +108,10 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
   #endif
 
   bm_BitMap *dct_screen_grab = bm_discrete_cosine_transform(plots[0], dct_dimension);
+
+  #ifdef DEBUG
+  bm_print(dct_screen_grab, "pngtest_dct");
+  #endif
 
   bm_destroy(plots[0]);
 
@@ -197,6 +203,8 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
     clock_t time_pdf_findplots_beg = clock();
 
     bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL);
+
+    qsort(plots, n_plots, sizeof(bm_BitMap), bm_by_area);
 
     bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 

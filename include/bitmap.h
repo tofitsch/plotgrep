@@ -10,7 +10,8 @@
 
 #include "misc.h"
 
-#define MAX_RECIP_PLOT_AREA_OF_TOTAL 100
+#define MAX_RECIP_PLOT_AREA_OF_TOTAL_PDF 100
+#define MAX_RECIP_PLOT_AREA_OF_TOTAL_PNG 1
 #define MAX_PLOT_ASPECT_RATIO 3
 #define MAX_PLOTS_PER_PAGE 16
 #define PNG_HEADER_BYTES 8
@@ -24,6 +25,8 @@ typedef struct {
 } bm_BitMap;
 
 bm_BitMap* bm_create(int, int);
+
+int bm_by_area(const void*, const void*);
 
 bm_BitMap* bm_from_pdf(fz_pixmap*);
 bm_BitMap* bm_from_png(png_bytep [], int, int);

@@ -19,6 +19,15 @@ bm_BitMap* bm_create(int w, int h) {
 
 }
 
+int bm_by_area(const void * a, const void * b) {
+
+  const bm_BitMap * A = (const bm_BitMap *) a;
+  const bm_BitMap * B = (const bm_BitMap *) b;
+
+  return A->w * A->h < B->w * B->h;
+
+}
+
 bm_BitMap* bm_from_pdf(fz_pixmap *pix) {
 
   int sum = 0; 
@@ -225,10 +234,12 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
 
   }
 
+  int max_recip_plot_area_of_total = (pix == NULL) ? MAX_RECIP_PLOT_AREA_OF_TOTAL_PNG : MAX_RECIP_PLOT_AREA_OF_TOTAL_PDF;
+
   for (int x = 0; x < bm->w; ++x) {
     for (int y = 0; y < bm->h; ++y) {
       
-      if(ones_right[y][x] * ones_down[y][x] == 0 || (bm->h * bm->w) / (ones_right[y][x] * ones_down[y][x]) > MAX_RECIP_PLOT_AREA_OF_TOTAL)
+      if(ones_right[y][x] * ones_down[y][x] == 0 || (bm->h * bm->w) / (ones_right[y][x] * ones_down[y][x]) > max_recip_plot_area_of_total)
         continue;
 
      for (int i = 0; i < *n_plots; ++i)
@@ -244,8 +255,8 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
           if(ones_down[y][x] < Y)
             continue;
 
-          if (ones_right[y + Y][x] >= X && X * Y > max_area && (bm->h * bm->w) / (X * Y) <= MAX_RECIP_PLOT_AREA_OF_TOTAL && X / Y < MAX_PLOT_ASPECT_RATIO && Y / X < MAX_PLOT_ASPECT_RATIO) {
-
+          if (ones_right[y + Y][x] >= X && X * Y > max_area && (bm->h * bm->w) / (X * Y) <= max_recip_plot_area_of_total && X / Y < MAX_PLOT_ASPECT_RATIO && Y / X < MAX_PLOT_ASPECT_RATIO) {
+            
             max_area = X * Y;
             
             w_max_area = X;
