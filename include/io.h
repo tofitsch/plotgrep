@@ -5,7 +5,7 @@
 #include "database.h"
 #include "benchmark.h"
 
-#define DEBUG
+//#define DEBUG
 
 #define TMP_FILE "tmp.png"
 

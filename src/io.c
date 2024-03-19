@@ -264,7 +264,7 @@ void io_add_plots_from_csv(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
   while(db_read_plot(in_file, &db_plots[*n_db_plots], hex_length)) {
 
-    printf("%s %s\n", db_plots[*n_db_plots].hex, db_plots[*n_db_plots].name);
+    printf("%03d %s %s\n", *n_db_plots, db_plots[*n_db_plots].hex, db_plots[*n_db_plots].name);
 
     if(out_file != NULL)
       db_write_plot(out_file, &db_plots[*n_db_plots]);

@@ -42,13 +42,11 @@ bool db_read_plot(FILE *f, db_EntryPlot *e, int hex_length){
 
   name[strlen(name) - 1] = '\0';
 
-  e->hex = (char *) calloc((strlen(hex)), sizeof(char));
-  e->name = (char *) calloc((strlen(name)), sizeof(char));
+  e->hex = (char *) calloc(strlen(hex) + 1, sizeof(char));
+  e->name = (char *) calloc(strlen(name) + 1, sizeof(char));
 
   strcpy(e->hex, hex);
   strcpy(e->name, name);
-
-  printf("%s %s\n", e->hex, e->name);
 
   return true;
 

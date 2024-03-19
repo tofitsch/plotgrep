@@ -19,8 +19,8 @@
 
 #define PDF_ZOOM 2
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
-#define MAX_DB_ENTRIES 65536
-#define MAX_DB_PAGE_ENTRIES 65536
+#define MAX_DB_ENTRIES 131072
+#define MAX_DB_PAGE_ENTRIES 131072
 
 bt_Time b;
 bt_Time *bt_time = &b;
