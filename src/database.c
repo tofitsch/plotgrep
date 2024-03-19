@@ -19,12 +19,8 @@ int db_by_max_time(const void * a, const void * b) {
 }
 
 void db_write_plot(FILE *f, db_EntryPlot *e){
-  
-  fputs(e->hex, f);
-  fputs(",", f);
 
-  fputs(e->name, f);
-  fputs("\n", f);
+  fprintf(f, "%s,%s,%d,%d\n", e->hex, e->file_name, e->page, e->plot);
 
 }
 
@@ -38,15 +34,35 @@ bool db_read_plot(FILE *f, db_EntryPlot *e, int hex_length){
   line[hex_length] = '\0';
 
   char *hex = line;
-  char *name = line + hex_length + 1;
+  char *file_name = line + hex_length + 1;
 
-  name[strlen(name) - 1] = '\0';
+  char *page = file_name;
+
+  while(*page != ',')
+    page++;
+
+  *page = '\0';
+
+  page++;
+
+  char *plot = page;
+
+  while(*plot != ',')
+    plot++;
+
+  *plot = '\0';
+
+  plot++;
 
   e->hex = (char *) calloc(strlen(hex) + 1, sizeof(char));
-  e->name = (char *) calloc(strlen(name) + 1, sizeof(char));
+  e->file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
 
   strcpy(e->hex, hex);
-  strcpy(e->name, name);
+  strcpy(e->file_name, file_name);
+
+
+  e->page = atoi(page);
+  e->plot = atoi(plot);
 
   return true;
 
@@ -55,7 +71,7 @@ bool db_read_plot(FILE *f, db_EntryPlot *e, int hex_length){
 void db_destroy_plot(db_EntryPlot *e){
 
   free(e->hex);
-  free(e->name);
+  free(e->file_name);
 
 }
 

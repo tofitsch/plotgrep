@@ -10,10 +10,8 @@
 
 typedef struct {
 
-  int dist;
-
-  char *name;
-  char *hex;
+  int dist, page, plot;
+  char *file_name, *hex;
 
 } db_EntryPlot;
 
