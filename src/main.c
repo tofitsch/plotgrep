@@ -137,8 +137,10 @@ int main(int argc, char **argv) {
 
     qsort(db_plots, n_db_plots, sizeof(db_EntryPlot), db_by_min_dist);
 
+    #ifdef DEBUG
     for(int i = 0; i < n_db_plots ; ++i)
       printf("%04d %s %s page %d plot %d\n", db_plots[i].dist, db_plots[i].hex, db_plots[i].file_name, db_plots[i].page, db_plots[i].plot);
+    #endif
 
     char command[128]; //TODO: dynamically allocate
 

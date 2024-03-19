@@ -223,9 +223,10 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
       bt_time->pdf_dct += (double) (clock() - time_pdf_dct_beg);
 
       char *hex = bm_to_hex(dct); //XXX
-      printf("%s %s\n", hex, plot_name);
 
       #ifdef DEBUG
+      printf("%s %s\n", hex, plot_name);
+
       bm_print(plots[i], plot_name);
       #endif
 
@@ -272,7 +273,9 @@ void io_add_plots_from_csv(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
   while(db_read_plot(in_file, &db_plots[*n_db_plots], hex_length)) {
 
+    #ifdef DEBUG
     printf("%03d %s %s\n", *n_db_plots, db_plots[*n_db_plots].hex, db_plots[*n_db_plots].file_name);
+    #endif
 
     if(out_file != NULL)
       db_write_plot(out_file, &db_plots[*n_db_plots]);
