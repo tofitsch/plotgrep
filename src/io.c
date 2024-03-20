@@ -170,12 +170,11 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
     db_pages[*n_db_pages].file_name = (char *) calloc(strlen(file_name), sizeof(char));
 
     strcpy(db_pages[*n_db_pages].file_name, file_name);
+
     db_pages[*n_db_pages].page = p + 1;
     db_pages[*n_db_pages].time = -1.;
 
     (*n_db_pages)++;
-
-    int n_plots = 0;
 
     fz_try(ctx)
       pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
@@ -189,13 +188,16 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
     bm_BitMap *bm = bm_from_pdf(pix);
 
     bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
+    int n_plots = 0;
 
+    #ifdef DEBUG
     char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
 
     sprintf(page_name, "%s_page_%03d", file_name, p + 1);
 
-    #ifdef DEBUG
     bm_print(bm, page_name);
+
+    free(page_name);
     #endif
 
     bt_time->pdf_mupdf += (double) (clock() - time_pdf_mupdf_beg);
@@ -204,18 +206,14 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
     bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL);
 
-    qsort(plots, n_plots, sizeof(bm_BitMap), bm_by_area);
+    qsort(plots, n_plots, sizeof(bm_BitMap*), bm_by_area);
 
     bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
     clock_t time_pdf_loopplots_beg = clock();
 
     for(int i = 0; i < n_plots; ++i){
-
-      char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
-
-      sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
-
+      
       clock_t time_pdf_dct_beg = clock();
 
       bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], dct_dimension);
@@ -225,13 +223,23 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
       char *hex = bm_to_hex(dct); //XXX
 
       #ifdef DEBUG
-      printf("%s %s\n", hex, plot_name);
+      char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+
+      sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
 
       bm_print(plots[i], plot_name);
+
+      free(plot_name);
       #endif
 
+      db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+
+      strcpy(db_plots[*n_db_plots].file_name, file_name);
+
       db_plots[*n_db_plots].hex = hex;
-      db_plots[*n_db_plots].file_name = plot_name;
+
+      db_plots[*n_db_plots].page = p + 1;
+      db_plots[*n_db_plots].plot = i + 1;
 
       db_plots[*n_db_plots].dist = -1;
 
@@ -252,8 +260,6 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
       bm_destroy(plots[i]);
 
     fz_drop_pixmap(ctx, pix);
-
-    free(page_name);
 
     db_pages[*n_db_pages - 1].time = (double) (clock() - time_pdf_mupdf_beg) / (double) CLOCKS_PER_SEC;
 
