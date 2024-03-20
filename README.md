@@ -10,3 +10,10 @@ gsutil -m cp -r gs://arxiv-dataset/arxiv/arxiv/pdf/2402/ ./axv
 ```
 
 Note: remove -ggdb3 from Makefile once debugging done
+
+For python tests:
+
+```
+pip uninstall PyMuPDF
+pip install PyMuPDF
+```
