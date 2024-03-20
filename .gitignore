@@ -2,6 +2,8 @@ build
 plotgrep
 axv
 
+atlas
+
 *.pdf
 *.ppm
 *.csv
