@@ -1,5 +1,7 @@
 // https://codeberg.org/caps-universe/libcapsraster/src/tag/libcapsraster-1.0.1/test/test-simple-mupdf.c
 // https://mupdf.com/docs/examples/example.c
+// TODO: https://mupdf.com/docs/examples/multi-threaded.c
+// TODO: https://docs.getindico.io/en/stable/http-api/access/
 // sudo apt-get install libmupdf-dev ljbig2dec 
 // sudo ln -s /usr/lib/x86_64-linux-gnu/libopenjp2.so.2.3.1 /usr/lib/x86_64-linux-gnu/libopenjp2.so
 // sudo ln -s /usr/lib/x86_64-linux-gnu/libjbig2dec.so.0 /usr/lib/x86_64-linux-gnu/libjbig2dec.so

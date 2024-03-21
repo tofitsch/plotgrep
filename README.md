@@ -17,3 +17,7 @@ For python tests:
 pip uninstall PyMuPDF
 pip install PyMuPDF
 ```
+
+## indico
+
+Create API key at https://indico.cern.ch/user/api/
