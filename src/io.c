@@ -196,25 +196,37 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
         return;
     }
 
-    fz_matrix ctm;
+//    fz_output *fz_new_output_with_path(fz_context *, const char *filename, int append);
+//    fz_output *fz_new_output_with_buffer(fz_context *ctx, fz_buffer *buf);
 
     fz_stext_page *text_page = fz_new_stext_page(ctx, fz_bound_page(ctx, page));
+
+    fz_matrix ctm;
+
     fz_device *dev = fz_new_stext_device(ctx, text_page, NULL);
     fz_run_page(ctx, page, dev, ctm, NULL);
 
-    fz_stext_block *block;
-    for (block = text_page->first_block; block; block = block->next) {
-        fz_stext_line *line;
-        for (line = block->u.t.first_line; line; line = line->next) {
-            fz_stext_char *ch;
-            for (ch = line->first_char; ch; ch = ch->next) {
-                printf("%c", ch->c);
-            }
-            printf("\n");
-        }
-    }
+    fz_output *out = fz_new_output_with_path(ctx, "test.txt", false);
+    fz_print_stext_page_as_text(ctx, out, text_page);
 
+//    fz_stext_block *block;
+//    for (block = text_page->first_block; block; block = block->next) {
+//        fz_stext_line *line;
+//        for (line = block->u.t.first_line; line; line = line->next) {
+//            fz_stext_char *ch;
+//            for (ch = line->first_char; ch; ch = ch->next) {
+//                printf("%c", ch->c);
+//            }
+//            printf("\n");
+//        }
+//    }
+
+    fz_close_device(ctx, dev);
     fz_drop_device(ctx, dev);
+
+    fz_close_output(ctx, out);
+    fz_drop_output(ctx, out);
+
     fz_drop_stext_page(ctx, text_page);
     fz_drop_page(ctx, page);
     ////////////////////////////////////////////////////////////
