@@ -119,11 +119,11 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
 
 }
 
-void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int pdf_zoom) {
+void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int pdf_zoom) {
 
+  fz_pixmap *pix = NULL;
   fz_context *ctx;
   fz_document *doc;
-  fz_pixmap *pix;
   fz_matrix mtx;
 
   ctx = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
@@ -176,157 +176,153 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
 
     (*n_db_pages)++;
 
-    fz_try(ctx)
-      pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
-    fz_catch(ctx) {
-      fprintf(stderr, "WARNING: cannot render page: %s\nskipping page %d in %s\nskipping %s\n", fz_caught_message(ctx), p + 1, file_name, file_name);
-      fz_drop_document(ctx, doc);
-      fz_drop_context(ctx);
-      return;
+    if(out_file_text != NULL) {
+
+      fz_page *page = fz_load_page(ctx, doc, 0);
+
+      if (!page) {
+          fprintf(stderr, "Failed to open page.\n");
+          fz_drop_document(ctx, doc);
+          fz_drop_context(ctx);
+          return;
+      }
+
+      fz_stext_page *text_page = fz_new_stext_page(ctx, fz_bound_page(ctx, page));
+
+      fz_device *dev = fz_new_stext_device(ctx, text_page, NULL);
+      fz_run_page(ctx, page, dev, mtx, NULL);
+
+      fz_stext_block *block;
+      fz_stext_line *line;
+      fz_stext_char *ch;
+
+      fprintf(out_file_text, "%s, page %d: ", file_name, p);
+
+      for (block = text_page->first_block; block; block = block->next) {
+        for (line = block->u.t.first_line; line; line = line->next) {
+
+          bool line_break_hyphen = false;
+
+          char c_prev = ' ';
+
+          for (ch = line->first_char; ch; ch = ch->next) {
+
+              if (ch->c == '-' && ch->next == NULL)
+                line_break_hyphen = true;
+
+              else if (ch->c >= 32 && ch->c <= 125 && (ch->c != ' ' || c_prev != ' ')) {
+
+                fprintf(out_file_text, "%c", ch->c);
+                c_prev = ch->c;
+
+              }
+
+          }
+
+          if (!line_break_hyphen && c_prev != ' ')
+            fprintf(out_file_text, " ");
+
+        }
+      }
+
+      fz_close_device(ctx, dev);
+      fz_drop_device(ctx, dev);
+
+      fz_drop_stext_page(ctx, text_page);
+      fz_drop_page(ctx, page);
+
     }
 
-    ////////////////////////////////////////////////////////////
-    //https://github.com/ArtifexSoftware/mupdf/blob/master/include/mupdf/fitz/structured-text.h
+    if (out_file_plots != NULL) {
 
-    fz_page *page = fz_load_page(ctx, doc, 0);
-    if (!page) {
-        fprintf(stderr, "Failed to open page.\n");
+      fz_try(ctx)
+        pix = fz_new_pixmap_from_page_number(ctx, doc, p, mtx, fz_device_gray(ctx), 0);
+      fz_catch(ctx) {
+        fprintf(stderr, "WARNING: cannot render page: %s\nskipping page %d in %s\nskipping %s\n", fz_caught_message(ctx), p + 1, file_name, file_name);
         fz_drop_document(ctx, doc);
         fz_drop_context(ctx);
         return;
-    }
-
-//    fz_output *fz_new_output_with_path(fz_context *, const char *filename, int append);
-//    fz_output *fz_new_output_with_buffer(fz_context *ctx, fz_buffer *buf);
-
-    fz_stext_page *text_page = fz_new_stext_page(ctx, fz_bound_page(ctx, page));
-
-    fz_device *dev = fz_new_stext_device(ctx, text_page, NULL);
-    fz_run_page(ctx, page, dev, mtx, NULL);
-
-    fz_output *out = fz_new_output_with_path(ctx, "test.txt", false);
-    fz_print_stext_page_as_text(ctx, out, text_page);
-
-    fz_stext_block *block;
-    fz_stext_line *line;
-    fz_stext_char *ch;
-
-    printf("%s, page %d: ", file_name, p);
-
-    for (block = text_page->first_block; block; block = block->next) {
-      for (line = block->u.t.first_line; line; line = line->next) {
-
-        bool line_break_hyphen = false;
-
-        char c_prev = ' ';
-
-        for (ch = line->first_char; ch; ch = ch->next) {
-
-            if (ch->c == '-' && ch->next == NULL)
-              line_break_hyphen = true;
-
-            else if (ch->c != ' ' || c_prev != ' ') {
-
-              printf("%c", ch->c);
-              c_prev = ch->c;
-
-            }
-
-        }
-
-        if (!line_break_hyphen && c_prev != ' ')
-          printf(" ");
-
       }
-    }
 
-    fz_close_device(ctx, dev);
-    fz_drop_device(ctx, dev);
+      bm_BitMap *bm = bm_from_pdf(pix);
 
-    fz_close_output(ctx, out);
-    fz_drop_output(ctx, out);
-
-    fz_drop_stext_page(ctx, text_page);
-    fz_drop_page(ctx, page);
-    ////////////////////////////////////////////////////////////
-
-    bm_BitMap *bm = bm_from_pdf(pix);
-
-    bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
-    int n_plots = 0;
-
-    #ifdef DEBUG
-    char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
-
-    sprintf(page_name, "%s_page_%03d", file_name, p + 1);
-
-    bm_print(bm, page_name);
-
-    free(page_name);
-    #endif
-
-    bt_time->pdf_mupdf += (double) (clock() - time_pdf_mupdf_beg);
-
-    clock_t time_pdf_findplots_beg = clock();
-
-    bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL);
-
-    qsort(plots, n_plots, sizeof(bm_BitMap*), bm_by_area);
-
-    bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
-
-    clock_t time_pdf_loopplots_beg = clock();
-
-    for(int i = 0; i < n_plots; ++i){
-      
-      clock_t time_pdf_dct_beg = clock();
-
-      bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], dct_dimension);
-
-      bt_time->pdf_dct += (double) (clock() - time_pdf_dct_beg);
-
-      char *hex = bm_to_hex(dct); //XXX
+      bm_BitMap *plots[MAX_PLOTS_PER_PAGE];
+      int n_plots = 0;
 
       #ifdef DEBUG
-      char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+      char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
 
-      sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
+      sprintf(page_name, "%s_page_%03d", file_name, p + 1);
 
-      bm_print(plots[i], plot_name);
+      bm_print(bm, page_name);
 
-      free(plot_name);
+      free(page_name);
       #endif
 
-      db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+      bt_time->pdf_mupdf += (double) (clock() - time_pdf_mupdf_beg);
 
-      strcpy(db_plots[*n_db_plots].file_name, file_name);
+      clock_t time_pdf_findplots_beg = clock();
 
-      db_plots[*n_db_plots].hex = hex;
+      bm_find_plots(bm, plots, &n_plots, MAX_PLOTS_PER_PAGE, pix, NULL);
 
-      db_plots[*n_db_plots].page = p + 1;
-      db_plots[*n_db_plots].plot = i + 1;
+      qsort(plots, n_plots, sizeof(bm_BitMap*), bm_by_area);
 
-      db_plots[*n_db_plots].dist = -1;
+      bt_time->pdf_findplots += (double) (clock() - time_pdf_findplots_beg);
 
-      if(out_file != NULL)
-        db_write_plot(out_file, &db_plots[*n_db_plots]);
+      clock_t time_pdf_loopplots_beg = clock();
 
-      (*n_db_plots)++;
-       
-      bm_destroy(dct);
+      for(int i = 0; i < n_plots; ++i){
+        
+        clock_t time_pdf_dct_beg = clock();
 
+        bm_BitMap *dct = bm_discrete_cosine_transform(plots[i], dct_dimension);
+
+        bt_time->pdf_dct += (double) (clock() - time_pdf_dct_beg);
+
+        char *hex = bm_to_hex(dct); //XXX
+
+        #ifdef DEBUG
+        char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+
+        sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
+
+        bm_print(plots[i], plot_name);
+
+        free(plot_name);
+        #endif
+
+        db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+
+        strcpy(db_plots[*n_db_plots].file_name, file_name);
+
+        db_plots[*n_db_plots].hex = hex;
+
+        db_plots[*n_db_plots].page = p + 1;
+        db_plots[*n_db_plots].plot = i + 1;
+
+        db_plots[*n_db_plots].dist = -1;
+
+        if(out_file_plots != NULL)
+          db_write_plot(out_file_plots, &db_plots[*n_db_plots]);
+
+        (*n_db_plots)++;
+         
+        bm_destroy(dct);
+
+      }
+
+      bt_time->pdf_loopplots += (double) (clock() - time_pdf_loopplots_beg);
+
+      bm_destroy(bm);
+
+      for(int i = 0; i < n_plots; ++i)
+        bm_destroy(plots[i]);
+
+      fz_drop_pixmap(ctx, pix);
+
+      db_pages[*n_db_pages - 1].time = (double) (clock() - time_pdf_mupdf_beg) / (double) CLOCKS_PER_SEC;
+    
     }
-
-    bt_time->pdf_loopplots += (double) (clock() - time_pdf_loopplots_beg);
-
-    bm_destroy(bm);
-
-    for(int i = 0; i < n_plots; ++i)
-      bm_destroy(plots[i]);
-
-    fz_drop_pixmap(ctx, pix);
-
-    db_pages[*n_db_pages - 1].time = (double) (clock() - time_pdf_mupdf_beg) / (double) CLOCKS_PER_SEC;
 
   }
 

@@ -34,8 +34,10 @@ int main(int argc, char **argv) {
   clock_t time_main_beg = clock();
   
   int i_arg = 1;
+  int arg_offset = 0;
 
-  FILE *out_file = NULL;
+  FILE *out_file_plots = NULL;
+  FILE *out_file_text = NULL;
 
   bm_BitMap *dct_screen_grab = NULL;
   
@@ -47,37 +49,79 @@ int main(int argc, char **argv) {
 
   if (argc < 2) {
     fprintf(stderr, "example usage:\n\n");
-    fprintf(stderr, " save from input PDFs to output CSV:\n");
+    fprintf(stderr, " save plots from input pdf to output csv:\n");
     fprintf(stderr, "  ./plotgrep -o output.csv input_file.pdf input_dir/*.pdf\n\n");
-    fprintf(stderr, " search screengrab in input PDFs and/or CSVs:\n");
+    fprintf(stderr, " save text from input pdf to output txt:\n");
+    fprintf(stderr, "  ./plotgrep -o output.txt input_file.pdf input_dir/*.pdf\n\n");
+    fprintf(stderr, " search screengrab plot in input pdf and/or csv:\n");
     fprintf(stderr, "  ./plotgrep input_file.pdf input_file.csv input_dir/*.pdf input_dir/*.csv\n\n"); 
     exit(EXIT_FAILURE);
   }
 
-  if(strcmp(argv[1], "-o") == 0) {
+  for(; i_arg < argc; ++i_arg){
+    //TODO: check that there is no -o argument after any non -o argument
 
-    if(argc < 3) {
-      fprintf(stderr, "output option '-o' given but no output file specified\n");
-      exit(EXIT_FAILURE);
+    if(strcmp(argv[i_arg], "-o") == 0) {
+
+      if(i_arg > argc - 2) {
+        fprintf(stderr, "output option '-o' given but no output file specified\n");
+        exit(EXIT_FAILURE);
+      }
+
+      char * file_name = argv[2];
+      char * file_extension = file_name + strlen(file_name) - 4;
+
+      if(strcmp(file_extension, ".csv") == 0) {
+        printf("output file for plots: %s\n", file_name);
+        out_file_plots = fopen(file_name, "w");
+      }
+      else if(strcmp(file_extension, ".txt") == 0) {
+        printf("output file for text: %s\n", file_name);
+        out_file_text = fopen(file_name, "w");
+      }
+      else {
+        fprintf(stderr, "output file '%s' has invalid extension '%s'. Must be '.csv' or '.txt'\n", file_name, file_extension);
+        exit(EXIT_FAILURE);
+      }
+
+      i_arg++;
+      arg_offset += 2;
+
     }
+    else {
 
-    char * file_name = argv[2];
-    char * file_extension = file_name + strlen(file_name) - 4;
+      char * file_name = argv[i_arg];
+      char * file_extension = file_name + strlen(file_name) - 4;
 
-    if(strcmp(file_extension, ".csv") != 0) {
-      fprintf(stderr, "output file '%s' has invalid extension '%s'. Must be '.csv'\n", file_name, file_extension);
-      exit(EXIT_FAILURE);
+      printf("input file %d of %d: %s\n", i_arg - arg_offset, argc - 1 - arg_offset, file_name);
+      
+      if (access(file_name, F_OK) == -1) {
+        fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
+        continue;
+      }
+
+      if(strcmp(file_extension, ".pdf") == 0) {
+
+        clock_t time_pdf_beg = clock();
+
+        io_read_pdf(file_name, out_file_plots, out_file_text, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, PDF_ZOOM);
+
+        bt_time->pdf += (double) (clock() - time_pdf_beg);
+
+      }
+      else if(strcmp(file_extension, ".csv") == 0) {
+        io_add_plots_from_csv(file_name, out_file_plots, db_plots, &n_db_plots, DCT_DIMENSION);
+      }
+      else {
+        fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
+        continue;
+      }
+
     }
-
-    printf("output file: %s\n", file_name);
-
-    out_file = fopen(file_name, "w");
-
-    i_arg += 2;
 
   }
 
-  if (out_file == NULL) {
+  if (out_file_plots == NULL && out_file_text == NULL) {
   
     dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION);
 
@@ -89,41 +133,7 @@ int main(int argc, char **argv) {
 
   }
 
-  for(; i_arg < argc; ++i_arg){
-    
-    char * file_name = argv[i_arg];
-    char * file_extension = file_name + strlen(file_name) - 4;
-
-    if (out_file == NULL)
-      printf("input file %d of %d: %s\n", i_arg, argc - 1, file_name);
-    else
-      printf("input file %d of %d: %s\n", i_arg - 2, argc - 3, file_name);
-    
-    if (access(file_name, F_OK) == -1) {
-      fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
-      continue;
-    }
-
-    if(strcmp(file_extension, ".pdf") == 0) {
-
-      clock_t time_pdf_beg = clock();
-
-      io_add_plots_from_pdf(file_name, out_file, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, PDF_ZOOM);
-
-      bt_time->pdf += (double) (clock() - time_pdf_beg);
-
-    }
-    else if(strcmp(file_extension, ".csv") == 0) {
-      io_add_plots_from_csv(file_name, out_file, db_plots, &n_db_plots, DCT_DIMENSION);
-    }
-    else {
-      fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
-      continue;
-    }
-
-  }
-
-  if (out_file == NULL) {
+  if (out_file_plots == NULL && out_file_text == NULL) {
 
     for(int i = 0; i < n_db_plots ; ++i) {
       
@@ -183,8 +193,11 @@ int main(int argc, char **argv) {
 
   free(db_pages);
 
-  if(out_file != NULL)
-    fclose(out_file);
+  if(out_file_plots != NULL)
+    fclose(out_file_plots);
+
+  if(out_file_text != NULL)
+    fclose(out_file_text);
 
   bt_time->main += (double) (clock() - time_main_beg);
 
