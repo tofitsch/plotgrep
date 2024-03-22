@@ -178,7 +178,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
     if(out_file_text != NULL) {
 
-      fz_page *page = fz_load_page(ctx, doc, 0);
+      fz_page *page = fz_load_page(ctx, doc, p);
 
       if (!page) {
           fprintf(stderr, "Failed to open page.\n");
@@ -224,6 +224,8 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
         }
       }
+
+      fprintf(out_file_text, "\n");
 
       fz_close_device(ctx, dev);
       fz_drop_device(ctx, dev);
