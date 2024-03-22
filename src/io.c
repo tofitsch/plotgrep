@@ -208,15 +208,36 @@ void io_add_plots_from_pdf(char *file_name, FILE *out_file, db_EntryPlot db_plot
     fz_print_stext_page_as_text(ctx, out, text_page);
 
     fz_stext_block *block;
+    fz_stext_line *line;
+    fz_stext_char *ch;
+
+    printf("%s, page %d: ", file_name, p);
+
     for (block = text_page->first_block; block; block = block->next) {
-        fz_stext_line *line;
-        for (line = block->u.t.first_line; line; line = line->next) {
-            fz_stext_char *ch;
-            for (ch = line->first_char; ch; ch = ch->next) {
-                printf("%c", ch->c);
+      for (line = block->u.t.first_line; line; line = line->next) {
+
+        bool line_break_hyphen = false;
+
+        char c_prev = ' ';
+
+        for (ch = line->first_char; ch; ch = ch->next) {
+
+            if (ch->c == '-' && ch->next == NULL)
+              line_break_hyphen = true;
+
+            else if (ch->c != ' ' || c_prev != ' ') {
+
+              printf("%c", ch->c);
+              c_prev = ch->c;
+
             }
-            printf("\n");
+
         }
+
+        if (!line_break_hyphen && c_prev != ' ')
+          printf(" ");
+
+      }
     }
 
     fz_close_device(ctx, dev);
