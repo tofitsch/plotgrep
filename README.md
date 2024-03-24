@@ -32,9 +32,15 @@ Search text as regex in TXT index created above and others (not implemented yet)
 
 ## Working principle
 Each page of a given PDF is first converted into a black and white bitmap:
-[bitmap_page](fig/higgs.pdf_page_007.ppm)
+[bitmap_page](fig/higgs.pdf_page_007.ppm.png)
 A pixel is assigned to be white if above and black if below a threshold of its grayscale brightness value.
 The threshold is determined by the average brightness of all pixels in the page.
+In each page bitmap the plots are identified as rectangles with a border containing exclusively black pixels (`bm_find_plots(...)` in `include/bitmap.h`):
+* For each black pixel in the page the number of consecutive black pixels down and right of it are identified
+* This allows to identify the largest possible rectangle with the starting pixel as top left corner.
+* If this rectangle has a large enough area (identified as fraction of the page area) and reasonable aspect ratio (not one side being much larger than the other) it is identified as plot
+In this case two plots are identified:
+[plot1](fig/higgs.pdf_page_007_plot_001.ppm.png) [plot2](fig/higgs.pdf_page_007_plot_002.ppm.png)
 
 # Setup and Install
 
