@@ -30,6 +30,8 @@ Search text as regex in TXT index created above and others (not implemented yet)
  ./plotgrep index.txt some_other_index_files/*.txt
 ```
 
+You can find ready-made CSV indices of all ATLAS papers, conf-notes, and pub-notes (up to 2024-03-20) in the `data` directory and the script used to download the PDFs they were made from in `data/scripts`.
+
 ## Working principle
 The following describes the process of indexing for example [this paper](https://arxiv.org/abs/1207.7214) (`higgs.pdf`):
 
@@ -136,6 +138,6 @@ Use [indicoscraper](https://github.com/tofitsch/indicoscraper)
 
 # Notes and TODO for development
 * Remove `-ggdb3` from Makefile once debugging done
-* /mu
+* twiki scraping
 * Add multi-threading for mupdf: https://mupdf.com/docs/examples/multi-threaded.c
 
