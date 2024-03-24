@@ -38,7 +38,16 @@ void tx_print(char *line, regmatch_t *match, int *n_matches) {
   else
     result_beg = ptr;
 
-  printf("%03d: %s page %s: '%s'\n", *n_matches, line, ptr_page, result_beg);
+  if (strlen(line) > FILE_OUTPUT_LENGTH) {
+
+    for (int i = 1; i <= 3; ++i)
+      *(line + FILE_OUTPUT_LENGTH - i) = '.';
+
+    *(line + FILE_OUTPUT_LENGTH) = '\0';
+
+  }
+
+  printf("%03d: %s page %s: %s\n", *n_matches, line, ptr_page, result_beg);
 
   (*n_matches)++;
 

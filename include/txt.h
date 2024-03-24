@@ -9,6 +9,7 @@
 
 #define MAX_LINE_LENGTH 64000
 #define RESULT_OUTPUT_LENGTH 128
+#define FILE_OUTPUT_LENGTH 32
 
 void tx_print(char*, regmatch_t*, int*);
 void tx_search(char*, char*, int*);
