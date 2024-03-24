@@ -55,8 +55,8 @@ In each page bitmap the plots are identified as rectangles with a border contain
 * For each black pixel in the page the number of consecutive black pixels down and right of it are identified
 * This allows to identify the largest possible rectangle with the starting pixel as top left corner.
 * If this rectangle has a large enough area (identified as fraction of the page area) and reasonable aspect ratio (not one side being much larger than the other) it is identified as plot
-In this case two plots are identified.
-The black/white threshold is re-determined from the average brightness of each plot in order to get a better contrast:
+* After each plot is identified, for each plot the black/white threshold is re-determined from the average brightness to get a better contrast:
+* In this case two plots are identified.
 
 <p align="center">
   <img src="fig/higgs.pdf_page_007_plot_001.ppm.png" width="350">
@@ -71,7 +71,7 @@ Only the first 16 components in x and y are calculated, resulting in a 16x16 bit
   <img src="fig/dct_higgs.pdf_page_007_plot_002.ppm.png" width="16">
 </p>
 
-This represents 16x16 = bits which can be represented as 64 hex-encoded chars which yield the final code for each plot.
+This represents 16x16 bits which can be represented as 64 hex-encoded chars which yield the final code for each plot.
 The code of each plot is stored in the output file `index.csv`:
 
 ```
