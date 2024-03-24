@@ -294,6 +294,14 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
         bm_print(plots[i], plot_name);
 
         free(plot_name);
+
+        char *dct_name = (char *) calloc(strlen("dct_") + 1 + strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+
+        sprintf(plot_name, "dct_%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
+
+        bm_print(dct, dct_name);
+
+        free(dct_name);
         #endif
 
         db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name), sizeof(char));
