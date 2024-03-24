@@ -28,6 +28,18 @@
 bt_Time b;
 bt_Time *bt_time = &b;
 
+void print_example_usage() {
+
+  fprintf(stderr, "\nexample usage:\n\n");
+  fprintf(stderr, " save plots from input pdf to output csv:\n");
+  fprintf(stderr, "  ./plotgrep -o output.csv input_file.pdf input_dir/*.pdf\n\n");
+  fprintf(stderr, " save text from input pdf to output txt:\n");
+  fprintf(stderr, "  ./plotgrep -o output.txt input_file.pdf input_dir/*.pdf\n\n");
+  fprintf(stderr, " search screengrab plot in csv:\n");
+  fprintf(stderr, "  ./plotgrep input_file.csv input_dir/*.csv\n\n"); 
+
+}
+
 int main(int argc, char **argv) {
   
   bt_init(bt_time);
@@ -49,30 +61,26 @@ int main(int argc, char **argv) {
   int n_db_pages = 0;
 
   if (argc < 2) {
-    fprintf(stderr, "example usage:\n\n");
-    fprintf(stderr, " save plots from input pdf to output csv:\n");
-    fprintf(stderr, "  ./plotgrep -o output.csv input_file.pdf input_dir/*.pdf\n\n");
-    fprintf(stderr, " save text from input pdf to output txt:\n");
-    fprintf(stderr, "  ./plotgrep -o output.txt input_file.pdf input_dir/*.pdf\n\n");
-    fprintf(stderr, " search screengrab plot in csv:\n");
-    fprintf(stderr, "  ./plotgrep input_file.csv input_dir/*.csv\n\n"); 
+    fprintf(stderr, "no arguments provided\n");
+    print_example_usage();
     exit(EXIT_FAILURE);
   }
 
   bool non_output_arg = false;
 
   for(; i_arg < argc; ++i_arg){
-    //TODO: check that there is no -o argument after any non -o argument
 
     if(strcmp(argv[i_arg], "-o") == 0) {
       
       if (non_output_arg) {
         fprintf(stderr, "outputs (option '-o') have to be specified before any inputs\n");
+        print_example_usage();
         exit(EXIT_FAILURE);
       }
 
       if (i_arg > argc - 2) {
         fprintf(stderr, "output option '-o' given but no output file specified\n");
+        print_example_usage();
         exit(EXIT_FAILURE);
       }
 
@@ -89,6 +97,7 @@ int main(int argc, char **argv) {
       }
       else {
         fprintf(stderr, "output file '%s' has invalid extension '%s'. Must be '.csv' or '.txt'\n", file_name, file_extension);
+        print_example_usage();
         exit(EXIT_FAILURE);
       }
 
@@ -114,6 +123,7 @@ int main(int argc, char **argv) {
 
         if (out_file_plots == NULL && out_file_text == NULL) {
           fprintf(stderr, "pdf input but no output (option '-o') specified\n");
+          print_example_usage();
           exit(EXIT_FAILURE);
         }
 
