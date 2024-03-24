@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
       if(strlen(arg) > 3)
         file_extension = arg + strlen(arg) - 4;
 
-      printf("input file %d of %d: %s\n", i_arg - arg_offset, argc - 1 - arg_offset, arg);
+      printf("input %d of %d: %s\n", i_arg - arg_offset, argc - 1 - arg_offset, arg);
 
       if (file_extension != NULL && strcmp(file_extension, ".pdf") == 0) {
 
