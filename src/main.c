@@ -54,17 +54,24 @@ int main(int argc, char **argv) {
     fprintf(stderr, "  ./plotgrep -o output.csv input_file.pdf input_dir/*.pdf\n\n");
     fprintf(stderr, " save text from input pdf to output txt:\n");
     fprintf(stderr, "  ./plotgrep -o output.txt input_file.pdf input_dir/*.pdf\n\n");
-    fprintf(stderr, " search screengrab plot in input pdf and/or csv:\n");
-    fprintf(stderr, "  ./plotgrep input_file.pdf input_file.csv input_dir/*.pdf input_dir/*.csv\n\n"); 
+    fprintf(stderr, " search screengrab plot in csv:\n");
+    fprintf(stderr, "  ./plotgrep input_file.csv input_dir/*.csv\n\n"); 
     exit(EXIT_FAILURE);
   }
+
+  bool non_output_arg = false;
 
   for(; i_arg < argc; ++i_arg){
     //TODO: check that there is no -o argument after any non -o argument
 
     if(strcmp(argv[i_arg], "-o") == 0) {
+      
+      if (non_output_arg) {
+        fprintf(stderr, "outputs (option '-o') have to be specified before any inputs\n");
+        exit(EXIT_FAILURE);
+      }
 
-      if(i_arg > argc - 2) {
+      if (i_arg > argc - 2) {
         fprintf(stderr, "output option '-o' given but no output file specified\n");
         exit(EXIT_FAILURE);
       }
@@ -90,6 +97,8 @@ int main(int argc, char **argv) {
 
     }
     else {
+      
+      non_output_arg = true;
 
       char * file_name = argv[i_arg];
       char * file_extension = file_name + strlen(file_name) - 4;
@@ -101,7 +110,12 @@ int main(int argc, char **argv) {
         continue;
       }
 
-      if(strcmp(file_extension, ".pdf") == 0) {
+      if (strcmp(file_extension, ".pdf") == 0) {
+
+        if (out_file_plots == NULL && out_file_text == NULL) {
+          fprintf(stderr, "pdf input but no output (option '-o') specified\n");
+          exit(EXIT_FAILURE);
+        }
 
         clock_t time_pdf_beg = clock();
 
