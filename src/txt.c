@@ -18,23 +18,27 @@ void tx_print(char *line, regmatch_t *match) {
 
   *ptr = '\0';
 
-  char *result = line + match->rm_so;
+  ptr++;
 
-  ptr = line + match->rm_eo;
+  size_t match_centre = match->rm_so + (match->rm_eo - match->rm_so) / 2;
 
-  for (int i = 0; i < RESULT_OUTPUT_LENGTH / 2 - (match->rm_eo - match->rm_so); ++i) {
+  char *result_beg = line + match_centre;
 
-    if(result != line)
-      result--;
+  char *result_end = NULL;
 
-    if(*ptr != '\0' && *ptr != '\n')
-      ptr++;
+  if((match_centre + RESULT_OUTPUT_LENGTH / 2) < strlen(ptr))
+    result_end = result_beg + RESULT_OUTPUT_LENGTH / 2;
+  else
+    result_end = ptr + strlen(ptr) - 1;
 
-  }
+  *result_end = '\0';
 
-  *ptr = '\0';
+  if(result_beg - RESULT_OUTPUT_LENGTH / 2 > ptr)
+    result_beg -= RESULT_OUTPUT_LENGTH / 2;
+  else
+    result_beg = ptr;
 
-  printf("%s page %s: '%s'\n", line, ptr_page, result);
+  printf("%s page %s: '%s'\n", line, ptr_page, result_beg);
 
 }
 

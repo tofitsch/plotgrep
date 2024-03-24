@@ -222,6 +222,7 @@ int main(int argc, char **argv) {
     if(db_pages[i].time > min_time_for_print)
       break;
 
+  #ifdef DEBUG
   printf("%d pages took longer than %lf s to load\n", n_db_pages - i, min_time_for_print);
 
   i--;
@@ -229,6 +230,8 @@ int main(int argc, char **argv) {
   for(; i < n_db_pages ; ++i)
     if(db_pages[i].time > min_time_for_print)
       printf("%lf s to load %s page %d\n", db_pages[i].time, db_pages[i].file_name, db_pages[i].page);
+  bt_print(bt_time);
+  #endif
 
   for(int i = 0; i < n_db_plots ; ++i)
     db_destroy_plot(&db_plots[i]);
@@ -247,8 +250,6 @@ int main(int argc, char **argv) {
     fclose(out_file_text);
 
   bt_time->main += (double) (clock() - time_main_beg);
-
-  bt_print(bt_time);
 
   return EXIT_SUCCESS;
 
