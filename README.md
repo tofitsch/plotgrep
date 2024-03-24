@@ -41,7 +41,7 @@ Each page of a given PDF is first converted into a black and white bitmap:
 
 <p align="center">
   <img src="fig/higgs.png" width="350">
-  <img src="fig/higgs.pdf_page_007.ppm.png" width="340">
+  <img src="fig/higgs.pdf_page_007.ppm.png" width="345">
 </p>
 
 This example is page 7 of the given paper (the first one containing plots).
