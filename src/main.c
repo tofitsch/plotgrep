@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <unistd.h>
 #include <time.h>
 #include <mupdf/fitz.h>
 
 #include "io.h"
 #include "bitmap.h"
 #include "database.h"
+#include "txt.h"
 
 #define PDF_ZOOM 2
 #define DCT_DIMENSION 16 //TODO: must be divisible by 4 (for hex encoding)
@@ -50,25 +50,27 @@ int main(int argc, char **argv) {
   int n_db_pages = 0;
 
   if (argc < 2) {
-    fprintf(stderr, "no arguments provided\n");
+    fprintf(stderr, "ERROR: no arguments provided\n");
     print_example_usage();
     exit(EXIT_FAILURE);
   }
 
-  bool non_output_arg = false;
+  bool input_provided = false;
+
+  char *regex_str = NULL;
 
   for(; i_arg < argc; ++i_arg){
 
     if(strcmp(argv[i_arg], "-o") == 0) {
       
-      if (non_output_arg) {
-        fprintf(stderr, "outputs (option '-o') have to be specified before any inputs\n");
+      if (input_provided) {
+        fprintf(stderr, "ERROR: outputs (option '-o') have to be specified before any inputs\n");
         print_example_usage();
         exit(EXIT_FAILURE);
       }
 
       if (i_arg > argc - 2) {
-        fprintf(stderr, "output option '-o' given but no output file specified\n");
+        fprintf(stderr, "ERROR: output option '-o' given but no output file specified\n");
         print_example_usage();
         exit(EXIT_FAILURE);
       }
@@ -85,7 +87,7 @@ int main(int argc, char **argv) {
         out_file_text = fopen(file_name, "w");
       }
       else {
-        fprintf(stderr, "output file '%s' has invalid extension '%s'. Must be '.csv' or '.txt'\n", file_name, file_extension);
+        fprintf(stderr, "ERROR: output file '%s' has invalid extension '%s'. Must be '.csv' or '.txt'\n", file_name, file_extension);
         print_example_usage();
         exit(EXIT_FAILURE);
       }
@@ -95,47 +97,78 @@ int main(int argc, char **argv) {
 
     }
     else {
+
+      char *arg = argv[i_arg];
       
-      non_output_arg = true;
+      char *file_extension = NULL;
 
-      char * file_name = argv[i_arg];
-      char * file_extension = file_name + strlen(file_name) - 4;
+      if(strlen(arg) > 3)
+        file_extension = arg + strlen(arg) - 4;
 
-      printf("input file %d of %d: %s\n", i_arg - arg_offset, argc - 1 - arg_offset, file_name);
-      
-      if (access(file_name, F_OK) == -1) {
-        fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
-        continue;
-      }
+      printf("input file %d of %d: %s\n", i_arg - arg_offset, argc - 1 - arg_offset, arg);
 
-      if (strcmp(file_extension, ".pdf") == 0) {
+      if (file_extension != NULL && strcmp(file_extension, ".pdf") == 0) {
 
         if (out_file_plots == NULL && out_file_text == NULL) {
-          fprintf(stderr, "pdf input but no output (option '-o') specified\n");
+          fprintf(stderr, "ERROR: pdf input but no output (option '-o') specified\n");
           print_example_usage();
           exit(EXIT_FAILURE);
         }
 
         clock_t time_pdf_beg = clock();
 
-        io_read_pdf(file_name, out_file_plots, out_file_text, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, PDF_ZOOM);
+        io_read_pdf(arg, out_file_plots, out_file_text, db_plots, &n_db_plots, db_pages, &n_db_pages, DCT_DIMENSION, PDF_ZOOM);
 
         bt_time->pdf += (double) (clock() - time_pdf_beg);
 
+        input_provided = true;
+
       }
-      else if(strcmp(file_extension, ".csv") == 0) {
-        io_add_plots_from_csv(file_name, out_file_plots, db_plots, &n_db_plots, DCT_DIMENSION);
+      else if (file_extension != NULL && strcmp(file_extension, ".csv") == 0) {
+      
+        io_add_plots_from_csv(arg, out_file_plots, db_plots, &n_db_plots, DCT_DIMENSION);
+
+        input_provided = true;
+
+      }
+      else if (file_extension != NULL && strcmp(file_extension, ".txt") == 0) {
+
+        if (regex_str == NULL) {
+          fprintf(stderr, "ERROR: Input txt file %s provided but no regex search string\n", arg);
+          exit(EXIT_FAILURE);
+        }
+      
+        tx_search(arg, regex_str);
+
+        input_provided = true;
+
       }
       else {
-        fprintf(stderr, "WARNING: invalid extension '%s' on input file '%s'. Must be '.csv' or '.pdf'\n", file_extension, file_name);
-        continue;
+       
+        if (out_file_plots != NULL || out_file_text != NULL) {
+          fprintf(stderr, "ERROR: regex search string '%s' provided together with output file (option -o). Regex search requires no output\n", arg);
+          exit(EXIT_FAILURE);
+        }
+
+        if (input_provided) {
+          fprintf(stderr, "ERROR: regex search string '%s' provided after input file. Regex search string must come first\n", arg);
+          exit(EXIT_FAILURE);
+        }
+
+        if (regex_str != NULL) {
+          fprintf(stderr, "ERROR: second regex search string '%s' provided. Only one allowed\n", arg);
+          exit(EXIT_FAILURE);
+        }
+
+        regex_str = arg;
+
       }
 
     }
 
   }
 
-  if (out_file_plots == NULL && out_file_text == NULL) {
+  if (out_file_plots == NULL && out_file_text == NULL && regex_str == NULL) {
   
     dct_screen_grab = io_get_plot_from_screen_grab(DCT_DIMENSION);
 
@@ -147,7 +180,7 @@ int main(int argc, char **argv) {
 
   }
 
-  if (out_file_plots == NULL && out_file_text == NULL) {
+  if (out_file_plots == NULL && out_file_text == NULL && regex_str == NULL) {
 
     for(int i = 0; i < n_db_plots ; ++i) {
       

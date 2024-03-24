@@ -121,6 +121,11 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
 
 void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_EntryPlot db_plots[], int *n_db_plots, db_EntryPage db_pages[], int *n_db_pages, int dct_dimension, int pdf_zoom) {
 
+  if (access(file_name, F_OK) == -1) {
+    fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
+    return;
+  }
+
   fz_pixmap *pix = NULL;
   fz_context *ctx;
   fz_document *doc;
@@ -346,6 +351,11 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 }
 
 void io_add_plots_from_csv(char *file_name, FILE *out_file, db_EntryPlot db_plots[], int *n_db_plots, int dct_dimension) {
+
+  if (access(file_name, F_OK) == -1) {
+    fprintf(stderr, "WARNING: input file '%s' does not exist\n", file_name);
+    return;
+  }
 
   FILE * in_file = fopen(file_name, "r");
 

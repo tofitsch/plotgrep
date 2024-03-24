@@ -1,6 +1,8 @@
 #ifndef __io_h_
 #define __io_h_
 
+#include <unistd.h>
+
 #include "bitmap.h"
 #include "database.h"
 #include "benchmark.h"
