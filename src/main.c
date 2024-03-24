@@ -58,6 +58,7 @@ int main(int argc, char **argv) {
   bool input_provided = false;
 
   char *regex_str = NULL;
+  int n_matches = 0;
 
   for(; i_arg < argc; ++i_arg){
 
@@ -138,7 +139,7 @@ int main(int argc, char **argv) {
           exit(EXIT_FAILURE);
         }
       
-        tx_search(arg, regex_str);
+        tx_search(arg, regex_str, &n_matches);
 
         input_provided = true;
 

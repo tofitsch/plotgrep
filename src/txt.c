@@ -1,6 +1,6 @@
 #include "txt.h"
 
-void tx_print(char *line, regmatch_t *match) {
+void tx_print(char *line, regmatch_t *match, int *n_matches) {
   
   char *ptr = line;
 
@@ -38,11 +38,13 @@ void tx_print(char *line, regmatch_t *match) {
   else
     result_beg = ptr;
 
-  printf("%s page %s: '%s'\n", line, ptr_page, result_beg);
+  printf("%03d: %s page %s: '%s'\n", *n_matches, line, ptr_page, result_beg);
+
+  (*n_matches)++;
 
 }
 
-void tx_search(char *in_file_name, char *pattern) {
+void tx_search(char *in_file_name, char *pattern, int *n_matches) {
 
   if (access(in_file_name, F_OK) == -1) {
     fprintf(stderr, "WARNING: input file '%s' does not exist\n", in_file_name);
@@ -66,7 +68,7 @@ void tx_search(char *in_file_name, char *pattern) {
 
   while (fgets(line, MAX_LINE_LENGTH, in_file) != NULL)
     if(!regexec(&regex, line, 1, &match, 0))
-      tx_print(line, &match);
+      tx_print(line, &match, n_matches);
 
   regfree(&regex);
 

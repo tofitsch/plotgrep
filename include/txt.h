@@ -10,7 +10,7 @@
 #define MAX_LINE_LENGTH 64000
 #define RESULT_OUTPUT_LENGTH 128
 
-void tx_print(char*, regmatch_t*);
-void tx_search(char*, char*);
+void tx_print(char*, regmatch_t*, int*);
+void tx_search(char*, char*, int*);
 
 #endif
