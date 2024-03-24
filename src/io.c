@@ -214,6 +214,9 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
                 fprintf(out_file_text, "%c", ch->c);
                 c_prev = ch->c;
+                
+                if ((ch->c == '.' || ch->c == ':' || ch->c == ';') && (ch->next == NULL || ch->next->c == ' '))
+                  fprintf(out_file_text, "\n%s, page %d: ", file_name, p);
 
               }
 

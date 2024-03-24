@@ -1,15 +1,21 @@
 build
 plotgrep
-axv
 static
 mupdf
 
+log
+x
+
 atlas
+axv
+
+*.secret
 
 *.pdf
 *.ppm
 *.csv
 *.log
+*.txt
 
 *.swp
 *.swo

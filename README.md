@@ -20,4 +20,6 @@ pip install PyMuPDF
 
 ## indico
 
-Create API key at https://indico.cern.ch/user/api/
+* Create API key at https://indico.cern.ch/user/api/
+* copy it into `indico_api.secret`
+
