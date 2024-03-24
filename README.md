@@ -31,10 +31,10 @@ Search text as regex in TXT index created above and others (not implemented yet)
 ```
 
 ## Working principle
-The following describes the process of indexing for example [this paper](https://arxiv.org/abs/1207.7214):
+The following describes the process of indexing for example [this paper](https://arxiv.org/abs/1207.7214) (`higgs.pdf`):
 
 ```
-./plotgrep -o index.csv 1207.7214.pdf
+./plotgrep -o index.csv higgs.pdf
 ```
 
 Each page of a given PDF is first converted into a black and white bitmap:
@@ -43,6 +43,7 @@ Each page of a given PDF is first converted into a black and white bitmap:
   <img src="fig/higgs.png" width="350">
   <img src="fig/higgs.pdf_page_007.ppm.png" width="350">
 </p>
+
 This example is page 7 of the given paper (the first one containing plots).
 
 A pixel is assigned to be white if above and black if below a threshold of its grayscale brightness value.
@@ -64,8 +65,8 @@ For each plot a discrete cosine transform is performed (`bm_discrete_cosine_tran
 Only the first 16 components in x and y are calculated, resulting in a 16x16 bitmap:
 
 <p align="center">
-  <img src="fig/dct_higgs.pdf_page_007_plot_001.ppm.png" width="350">
-  <img src="fig/dct_higgs.pdf_page_007_plot_002.ppm.png" width="350">
+  <img src="fig/dct_higgs.pdf_page_007_plot_001.ppm.png" width="16">
+  <img src="fig/dct_higgs.pdf_page_007_plot_002.ppm.png" width="16">
 </p>
 
 This represents 16x16 = bits which can be represented as 64 hex-encoded chars which yield the final code for each plot.
@@ -82,7 +83,7 @@ When then searching for a plot based on a screen grab by:
 ./plotgrep index.csv
 ```
 
-The same procedure is performed on the screen grap as described above for the PDF pages.
+The same procedure is performed on the screen grab as described above for the PDF pages.
 Each hex-code stored in `index.csv` is converted back into a 16x16 DCT bitmap which is compared to the 16x16 DCT bitmap of the plot in the screen grab.
 For each, the amount of different bits is determined using the hamming distance.
 
