@@ -6,7 +6,7 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
 
   char command[] = "import -depth 8 -colorspace gray ";
 
-  char *full_command = (char *) calloc((strlen(command) + strlen(TMP_FILE) + 1), sizeof(char));
+  char *full_command = calloc((strlen(command) + strlen(TMP_FILE) + 1), sizeof(char));
 
   strcat(full_command, command);
   strcat(full_command, TMP_FILE);
@@ -62,11 +62,11 @@ bm_BitMap* io_get_plot_from_screen_grab(int dct_dimension) {
   int w = png_get_image_width(png_ptr, info_ptr);
   int h = png_get_image_height(png_ptr, info_ptr);
 
-  png_bytep *png_bytes = (png_bytep *) malloc(h * sizeof(png_bytep));
+  png_bytep *png_bytes = malloc(h * sizeof(png_bytep));
 
   for (int y = 0; y < h; ++y) {
 
-    png_bytes[y] = (png_bytep) malloc(png_get_rowbytes(png_ptr, info_ptr));
+    png_bytes[y] = malloc(png_get_rowbytes(png_ptr, info_ptr));
 
     png_read_row(png_ptr, png_bytes[y], NULL);
 
@@ -172,7 +172,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
     clock_t time_pdf_mupdf_beg = clock();
 
-    db_pages[*n_db_pages].file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
+    db_pages[*n_db_pages].file_name = calloc(strlen(file_name) + 1, sizeof(char));
 
     strcpy(db_pages[*n_db_pages].file_name, file_name);
 
@@ -257,7 +257,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
       int n_plots = 0;
 
       #ifdef DEBUG
-      char *page_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
+      char *page_name = calloc(strlen(file_name) + 1 + strlen("page_XXXX"), sizeof(char)); //TODO: better name
 
       sprintf(page_name, "%s_page_%03d", file_name, p + 1);
 
@@ -289,7 +289,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
         char *hex = bm_to_hex(dct); //XXX
 
         #ifdef DEBUG
-        char *plot_name = (char *) calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+        char *plot_name = calloc(strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
 
         sprintf(plot_name, "%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
 
@@ -297,7 +297,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
         free(plot_name);
 
-        char *dct_name = (char *) calloc(strlen("dct_") + 1 + strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
+        char *dct_name = calloc(strlen("dct_") + 1 + strlen(file_name) + 1 + strlen("page_XXXX_plot_XXXX"), sizeof(char)); //TODO: better name
 
         sprintf(plot_name, "dct_%s_page_%03d_plot_%03d", file_name, p + 1, i + 1);
 
@@ -306,7 +306,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
         free(dct_name);
         #endif
 
-        db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
+        db_plots[*n_db_plots].file_name = calloc(strlen(file_name) + 1, sizeof(char));
 
         strcpy(db_plots[*n_db_plots].file_name, file_name);
 

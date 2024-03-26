@@ -56,12 +56,11 @@ bool db_read_plot(FILE *f, db_EntryPlot *e, int hex_length){
 
   plot++;
 
-  e->hex = (char *) calloc(strlen(hex) + 1, sizeof(char));
-  e->file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
+  e->hex = calloc(strlen(hex) + 1, sizeof(char));
+  e->file_name = calloc(strlen(file_name) + 1, sizeof(char));
 
   strcpy(e->hex, hex);
   strcpy(e->file_name, file_name);
-
 
   e->page = atoi(page);
   e->plot = atoi(plot);

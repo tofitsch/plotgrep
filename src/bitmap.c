@@ -2,7 +2,7 @@
 
 bm_BitMap* bm_create(int w, int h) {
 
-  bm_BitMap *bm = (bm_BitMap*) malloc(sizeof(bm));
+  bm_BitMap *bm = malloc(sizeof(bm));
 
   bm->x = 0;
   bm->y = 0;
@@ -10,10 +10,10 @@ bm_BitMap* bm_create(int w, int h) {
   bm->w = w;
   bm->h = h;
 
-  bm->data = (bool**) malloc(h * sizeof(bool*));
+  bm->data = malloc(h * sizeof(bool*));
 
   for (int y = 0; y < h; ++y)
-    bm->data[y] = (bool*) malloc(w * sizeof(bool));
+    bm->data[y] = malloc(w * sizeof(bool));
 
   return bm;
 
@@ -170,7 +170,7 @@ void bm_print(bm_BitMap *bm, char * prefix){
   
   char suffix[] = ".ppm"; 
 
-  char *file_name = (char *) calloc((strlen(prefix) + strlen(suffix) + 1), sizeof(char));
+  char *file_name = calloc((strlen(prefix) + strlen(suffix) + 1), sizeof(char));
 
   strcat(file_name, prefix);
   strcat(file_name, suffix);
@@ -206,13 +206,13 @@ void bm_find_plots(bm_BitMap *bm, bm_BitMap *plots[], int *n_plots, int n_plots_
 
   *n_plots = 0;
 
-  int **ones_right = (int **) malloc(bm->h * sizeof(int *)); //TODO: Done re-allocate this for each bm?
-  int **ones_down = (int **) malloc(bm->h * sizeof(int *));
+  int **ones_right = malloc(bm->h * sizeof(int *)); //TODO: Done re-allocate this for each bm?
+  int **ones_down = malloc(bm->h * sizeof(int *));
 
   for (int y = 0; y < bm->h; y++) {
 
-    ones_right[y] = (int *) malloc(bm->w * sizeof(int));
-    ones_down[y] = (int *) malloc(bm->w * sizeof(int));
+    ones_right[y] = malloc(bm->w * sizeof(int));
+    ones_down[y] = malloc(bm->w * sizeof(int));
 
   }
 
@@ -351,7 +351,7 @@ char* bm_to_hex(bm_BitMap* bm){
   
   int n_bits = bm->w * bm->h;
 
-  char *str = (char*) calloc((n_bits + 1), sizeof(char));
+  char *str = calloc((n_bits + 1), sizeof(char));
 
   str[n_bits] = '\0';
 

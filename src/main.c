@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
 
   bm_BitMap *dct_screen_grab = NULL;
   
-  db_EntryPlot *db_plots = (db_EntryPlot*) malloc(MAX_DB_ENTRIES * sizeof(db_EntryPlot));
+  db_EntryPlot *db_plots = malloc(MAX_DB_ENTRIES * sizeof(db_EntryPlot));
   int n_db_plots = 0;
 
-  db_EntryPage *db_pages = (db_EntryPage*) malloc(MAX_DB_PAGE_ENTRIES * sizeof(db_EntryPage));
+  db_EntryPage *db_pages = malloc(MAX_DB_PAGE_ENTRIES * sizeof(db_EntryPage));
   int n_db_pages = 0;
 
   if (argc < 2) {
