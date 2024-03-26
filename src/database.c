@@ -20,6 +20,8 @@ int db_by_max_time(const void * a, const void * b) {
 
 void db_write_plot(FILE *f, db_EntryPlot *e){
   
+  printf("%s,%s,%d,%d\n", e->hex, e->file_name, e->page, e->plot);
+
   fprintf(f, "%s,%s,%d,%d\n", e->hex, e->file_name, e->page, e->plot);
 
 }

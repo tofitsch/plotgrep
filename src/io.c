@@ -172,7 +172,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
 
     clock_t time_pdf_mupdf_beg = clock();
 
-    db_pages[*n_db_pages].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+    db_pages[*n_db_pages].file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
 
     strcpy(db_pages[*n_db_pages].file_name, file_name);
 
@@ -306,7 +306,7 @@ void io_read_pdf(char *file_name, FILE *out_file_plots, FILE *out_file_text, db_
         free(dct_name);
         #endif
 
-        db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name), sizeof(char));
+        db_plots[*n_db_plots].file_name = (char *) calloc(strlen(file_name) + 1, sizeof(char));
 
         strcpy(db_plots[*n_db_plots].file_name, file_name);
 
