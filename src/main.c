@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
       }
 
-      char * file_name = argv[2];
+      char * file_name = argv[i_arg + 1];
       char * file_extension = file_name + strlen(file_name) - 4;
 
       if(strcmp(file_extension, ".csv") == 0) {
