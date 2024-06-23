@@ -106,7 +106,8 @@ void tx_search(char *in_file_name, char *pattern, int *n_matches) {
 
   while (fgets(line, MAX_LINE_LENGTH, in_file) != NULL && *n_matches < MAX_MATCHES - 1)
     if(!regexec(&regex, line, 1, &match, 0))
-      tx_print(line, &match, n_matches, &pages[*n_matches], &(files[*n_matches]), &(matches[*n_matches]));
+      if(match.rm_eo - match.rm_so < 30) //TODO
+        tx_print(line, &match, n_matches, &pages[*n_matches], &(files[*n_matches]), &(matches[*n_matches]));
 
   fclose(in_file);
 
