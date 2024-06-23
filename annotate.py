@@ -14,11 +14,11 @@ if p < len(doc):
    
   page = doc[p]
 
-  rl = page.search_for(term, quads=True)
+  rl = page.search_for(term)
 
   if len(rl) > 0:
 
-    page.add_squiggly_annot(rl)
+    page.add_highlight_annot(rl)
 
     doc.save('tmp.pdf')
 

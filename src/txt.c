@@ -37,7 +37,7 @@ void tx_print(char *line, regmatch_t *match, int *n_matches, int *page, char (*t
 
   *out_end = '\0';
 
-  char *result = malloc((strlen(out_beg) + strlen(ANSI_RED) + strlen(ANSI_NORM)) * sizeof(char));
+  char *result = malloc((strlen(out_beg) + strlen(ANSI_YELLOW) + strlen(ANSI_NORM)) * sizeof(char));
 
   char c;
 
@@ -53,7 +53,9 @@ void tx_print(char *line, regmatch_t *match, int *n_matches, int *page, char (*t
 
   *match_end = '\0';
 
-  strcat(result, ANSI_RED);
+  strcpy(*this_match, match_beg);
+
+  strcat(result, ANSI_YELLOW);
   strcat(result, match_beg);
 
   *match_end = c;
@@ -61,15 +63,18 @@ void tx_print(char *line, regmatch_t *match, int *n_matches, int *page, char (*t
   strcat(result, ANSI_NORM);
   strcat(result, match_end);
 
-  printf("%03d: %s page %s: %s\n", *n_matches, line, ptr_page, result);
+  strcpy(*this_file, line);
+
+  if(strlen(line) > FILE_OUTPUT_LENGTH)
+    line += strlen(line) - FILE_OUTPUT_LENGTH;
+
+  printf("%s%03d%s: %s%s%s %spage %s%s: %s\n", ANSI_PURPLE, *n_matches, ANSI_NORM, ANSI_BLUE, line, ANSI_NORM, ANSI_GREEN, ptr_page, ANSI_NORM, result);
 
   (*n_matches)++;
 
   free(result);
 
   *page = atoi(ptr_page);
-  strcpy(*this_file, line);
-  strcpy(*this_match, match_beg);
 
 }
 
@@ -99,11 +104,21 @@ void tx_search(char *in_file_name, char *pattern, int *n_matches) {
   char files[MAX_FILE_NAME_LENGTH][MAX_MATCHES];
   char matches[MAX_MATCH_LENGTH][MAX_MATCHES];
 
-  while (fgets(line, MAX_LINE_LENGTH, in_file) != NULL)
-    if(!regexec(&regex, line, 1, &match, 0) && *n_matches < MAX_MATCHES - 1)
+  while (fgets(line, MAX_LINE_LENGTH, in_file) != NULL && *n_matches < MAX_MATCHES - 1)
+    if(!regexec(&regex, line, 1, &match, 0))
       tx_print(line, &match, n_matches, &pages[*n_matches], &(files[*n_matches]), &(matches[*n_matches]));
 
-  printf("type match number to jump to pdf, any other input to quit\n");
+  fclose(in_file);
+
+  if (*n_matches == 0) {
+
+    printf("no matches found\n");
+
+    return;
+
+  }
+
+  printf("type %smatch number%s to jump to pdf, any other input to quit\n", ANSI_PURPLE, ANSI_NORM);
 
   int number;
 
@@ -111,7 +126,7 @@ void tx_search(char *in_file_name, char *pattern, int *n_matches) {
 
     printf("You entered: %d\n", number);
 
-    if(number > 0 && number < * n_matches) {
+    if(number >= 0 && number < * n_matches) {
 
       char command[1024]; //TODO: dynamically allocate
 
@@ -126,9 +141,5 @@ void tx_search(char *in_file_name, char *pattern, int *n_matches) {
       printf("WARNING: provided number out of range of matches\n");
 
   }
-
-  regfree(&regex);
-
-  fclose(in_file);
 
 }
