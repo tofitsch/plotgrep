@@ -129,7 +129,7 @@ void tx_search(char *in_file_name, char *pattern, int *n_matches) {
 
     if(number >= 0 && number < * n_matches) {
 
-      char command[1024]; //TODO: dynamically allocate
+      char command[4096]; //TODO: dynamically allocate
 
       sprintf(command, "python3 annotate.py %s %d \"%s\"", files[number], pages[number], matches[number]); //TODO: do this in C
 
