@@ -26,6 +26,8 @@ void print_example_usage() {
   fprintf(stderr, "  ./plotgrep -o output.txt input_file.pdf input_dir/*.pdf\n\n");
   fprintf(stderr, " search screengrab plot in csv:\n");
   fprintf(stderr, "  ./plotgrep input_file.csv input_dir/*.csv\n\n"); 
+  fprintf(stderr, " search for regex in txt:\n");
+  fprintf(stderr, "  ./plotgrep -r \"test.*text\" input_file.txt input_dir/*.txt\n\n"); 
 
 }
 
@@ -56,6 +58,7 @@ int main(int argc, char **argv) {
   }
 
   bool input_provided = false;
+  bool regex_provided = false;
 
   char *regex_str = NULL;
   int n_matches = 0;
@@ -66,6 +69,12 @@ int main(int argc, char **argv) {
       
       if (input_provided) {
         fprintf(stderr, "ERROR: outputs (option '-o') have to be specified before any inputs\n");
+        print_example_usage();
+        exit(EXIT_FAILURE);
+      }
+
+      if (regex_provided) {
+        fprintf(stderr, "ERROR: cannot use both regex search string (option '-r') and output (option '-o') at the same time\n");
         print_example_usage();
         exit(EXIT_FAILURE);
       }
@@ -92,6 +101,28 @@ int main(int argc, char **argv) {
         print_example_usage();
         exit(EXIT_FAILURE);
       }
+
+      i_arg++;
+      arg_offset += 2;
+
+    }
+    else if(strcmp(argv[i_arg], "-r") == 0) {
+
+      if (i_arg != 1) {
+        fprintf(stderr, "ERROR: regex (option '-r') has to be in first position\n");
+        print_example_usage();
+        exit(EXIT_FAILURE);
+      }
+
+      if (i_arg > argc - 2) {
+        fprintf(stderr, "ERROR: regex option '-r' given but no regex string specified\n");
+        print_example_usage();
+        exit(EXIT_FAILURE);
+      }
+
+      regex_str = argv[i_arg + 1];
+
+      printf("regex: \"%s\"\n", regex_str);
 
       i_arg++;
       arg_offset += 2;
@@ -135,7 +166,8 @@ int main(int argc, char **argv) {
       else if (file_extension != NULL && strcmp(file_extension, ".txt") == 0) {
 
         if (regex_str == NULL) {
-          fprintf(stderr, "ERROR: Input txt file %s provided but no regex search string\n", arg);
+          fprintf(stderr, "ERROR: Input txt file %s but no regex search string provided\n", arg);
+          print_example_usage();
           exit(EXIT_FAILURE);
         }
       

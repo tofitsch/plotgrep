@@ -3,9 +3,9 @@ import os
 import glob
 import fitz
 
-term = 'order to record'
+term = 'test'
 
-files = glob.glob('test1.pdf')
+files = glob.glob('../higgs.pdf')
 
 for d, file_name in enumerate(files):
   
